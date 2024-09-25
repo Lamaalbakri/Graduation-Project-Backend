@@ -1,11 +1,11 @@
 const express = require('express');//import the express library
 
-const { getRawMaterialRequest } = require('../services/rowMaterialRequestService');
+const { getRawMaterialRequest, createRawMaterialRequest } = require('../services/rowMaterialRequestService');
 
 
 const router = express.Router();
 
 //Routes
-router.get('/', getRawMaterialRequest);
+router.route('/').get(getRawMaterialRequest).post(createRawMaterialRequest);
 
 module.exports = router;
