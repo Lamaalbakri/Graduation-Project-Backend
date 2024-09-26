@@ -67,4 +67,36 @@ exports.createRawMaterialRequest = asyncHandler(async (req, res) => {
 
 });
 
-//delete 
+
+// @desc Update Specific Raw Material Request 
+// @route PUT /api/v1/rawMaterialRequest/:id
+// @access Private
+exports.updateRawMaterialRequest = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const request = await RawMaterialRequestModel.findOneAndUpdate(
+        { _id: id },//identifier to find the request 
+        { status },//the data will update
+        { new: true }//to return data after ubdate
+    );
+
+    //check if the request is null or undefined
+    if (!request) {
+        return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
+    }
+    res.status(200).json({ data: request });
+});
+
+// @desc Delete Specific Raw Material Request 
+// @route DELETE /api/v1/rawMaterialRequest/:id
+// @access Private
+exports.deleteRawMaterialRequest = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const request = await RawMaterialRequestModel.findByIdAndDelete(id);
+
+    //check if the request is null or undefined
+    if (!request) {
+        return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
+    }
+    res.status(204).send();
+});
