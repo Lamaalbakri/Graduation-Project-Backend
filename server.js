@@ -7,7 +7,7 @@ const cors = require('cors');
 //Load variables from config.env file
 dotenv.config({ path: 'config.env' });
 const dbConnection = require('./config/database');
-const rawMaterialRequestRoute = require('./routes/rawMaterialRequestRoute')
+const rawMaterialCurrentRequestRoute = require('./routes/rawMaterialCurrentRequestRoute')
 
 //connect with DB
 
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV == 'development') {
 }
 
 //Mount Route
-app.use('/api/v1/rawMaterialRequest', rawMaterialRequestRoute)
+app.use('/api/v1/rawMaterialCurrentRequest', rawMaterialCurrentRequestRoute)
 
 
 //get the port from config.env file

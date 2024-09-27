@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');//import mongoose 
 
 //1-create schema
-const RawMaterialRequestSchema = new mongoose.Schema(
+const RawMaterialCurrentRequestSchema = new mongoose.Schema(
     {
         manufacturerId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -57,6 +57,6 @@ const RawMaterialRequestSchema = new mongoose.Schema(
 );
 
 //2- create model
-const RawMaterialRequestModel = mongoose.model('RawMaterialRequest', RawMaterialRequestSchema);
+const RawMaterialCurrentRequestModel = mongoose.model('Raw-Material-Current-Request', RawMaterialCurrentRequestSchema);
 
-module.exports = RawMaterialRequestModel;
+module.exports = RawMaterialCurrentRequestModel
