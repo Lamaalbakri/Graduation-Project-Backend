@@ -7,11 +7,12 @@ const mongoose = require('mongoose');
 // @route GET /api/v1/rawMaterialRequest
 // @access Public
 exports.getRawMaterialRequests = asyncHandler(async (req, res) => {
-    const page = req.query.page * 1 || 1;//To divide data into pages
-    const limit = req.query.limit * 1 || 5;//Number of data to appear on each page
-    const skip = (page - 1) * limit;//If I was on page  (2), I would skip the number of previous pages minus the page I am on multiplied by the number of data in it.
-    const RawMaterialRequests = await RawMaterialRequestModel.find({}).skip(skip).limit(limit);
-    res.status(200).json({ results: RawMaterialRequests.length, page, data: RawMaterialRequests });
+    // const page = req.query.page * 1 || 1;//To divide data into pages
+    // const limit = req.query.limit * 1 || 5;//Number of data to appear on each page
+    // const skip = (page - 1) * limit;//If I was on page  (2), I would skip the number of previous pages minus the page I am on multiplied by the number of data in it.
+
+    const RawMaterialRequests = await RawMaterialRequestModel.find({});//.skip(skip).limit(limit)
+    res.status(200).json({ data: RawMaterialRequests });//results: RawMaterialRequests.length, , page
 });
 
 // @desc Get Specific Raw Material Request by id
@@ -47,6 +48,21 @@ exports.getRawMaterialRequestByMSlug = asyncHandler(async (req, res) => {
     }
     res.status(200).json({ data: request });
 });
+
+// // @desc Get Specific Raw Material Request by manufacturer name 
+// // @route GET /api/v1/rawMaterialRequest/manufacturer/slug/:slug
+// // @access Public
+// exports.getRawMaterialRequestByMName = asyncHandler(async (req, res) => {
+//     const { slug } = req.params;//take  slug from / :slug
+
+//     const request = await RawMaterialRequestModel.findOne({ slug });
+
+//     //check if the request is null or undefined
+//     if (!request) {
+//         return res.status(404).json({ msg: `There is no Request for this manufacturer slug: ${slug}` });
+//     }
+//     res.status(200).json({ data: request });
+// });
 
 // @desc Create Raw Material Request 
 // @route POST /api/v1/rawMaterialRequest
