@@ -9,8 +9,9 @@ dotenv.config({ path: 'config.env' });
 const dbConnection = require('./config/database');
 const rawMaterialCurrentRequestRoute = require('./routes/rawMaterialCurrentRequestRoute')
 const rawMaterialPreviousRequestRoute = require('./routes/rawMaterialPreviousRequestRoute')
-//connect with DB
+const assignTransporterRoute = require('./routes/assignTransporterRoute');
 
+//connect with DB
 dbConnection();
 
 //Create a server application (app express)
@@ -30,6 +31,7 @@ if (process.env.NODE_ENV == 'development') {
 //Mount Route
 app.use('/api/v1/rawMaterialCurrentRequest', rawMaterialCurrentRequestRoute)
 app.use('/api/v1/rawMaterialPreviousRequest', rawMaterialPreviousRequestRoute)
+app.use('/api/v1/transportRequest', assignTransporterRoute);
 
 //get the port from config.env file
 const PORT = process.env.PORT || 8500;
