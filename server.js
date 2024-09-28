@@ -8,7 +8,7 @@ const cors = require('cors');
 dotenv.config({ path: 'config.env' });
 const dbConnection = require('./config/database');
 const rawMaterialCurrentRequestRoute = require('./routes/rawMaterialCurrentRequestRoute')
-
+const rawMaterialPreviousRequestRoute = require('./routes/rawMaterialPreviousRequestRoute')
 //connect with DB
 
 dbConnection();
@@ -29,7 +29,7 @@ if (process.env.NODE_ENV == 'development') {
 
 //Mount Route
 app.use('/api/v1/rawMaterialCurrentRequest', rawMaterialCurrentRequestRoute)
-
+app.use('/api/v1/rawMaterialPreviousRequest', rawMaterialPreviousRequestRoute)
 
 //get the port from config.env file
 const PORT = process.env.PORT || 8500;
