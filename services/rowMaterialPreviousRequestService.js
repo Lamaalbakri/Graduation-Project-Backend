@@ -68,19 +68,38 @@ exports.getRawMaterialPreviousRequestByMSlug = asyncHandler(async (req, res) => 
 // @route POST /api/v1/rawMaterialPreviousRequest
 // @access Public
 exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
-    const manufacturerName = req.body.manufacturerName;
-    const supplyingItems = req.body.supplyingItems;
-    const quantity = req.body.quantity;
-    const arrivalCity = req.body.arrivalCity;
-    const price = req.body.price;
-    const status = req.body.status;
-    const notes = req.body.notes;
-    const trackingInfo = req.body.trackingInfo;
+    const {
+        _id,
+        manufacturerName,
+        supplyingItems,
+        quantity,
+        arrivalCity,
+        price,
+        status,
+        notes,
+        trackingInfo
+    } = req.body;
 
     //Async Await Syntax 
-    const RawMaterialPreviousRequest = await RawMaterialPreviousRequestModel.create({ manufacturerName, supplyingItems, quantity, arrivalCity, price, status, notes, trackingInfo, slug: slugify(manufacturerName) });
-    res.status(201).json({ data: RawMaterialPreviousRequest });
+    const rawMaterialRequestData = {
+        manufacturerName,
+        supplyingItems,
+        quantity,
+        arrivalCity,
+        price,
+        status,
+        notes,
+        trackingInfo,
+        slug: slugify(manufacturerName),
+    };
 
+    // إذا كان الـ _id موجودًا، نضيفه إلى البيانات المرسلة
+    if (_id) {
+        rawMaterialRequestData._id = _id;
+    }
+
+    const RawMaterialPreviousRequest = await RawMaterialPreviousRequestModel.create(rawMaterialRequestData);
+    res.status(201).json({ data: RawMaterialPreviousRequest });
 });
 
 
