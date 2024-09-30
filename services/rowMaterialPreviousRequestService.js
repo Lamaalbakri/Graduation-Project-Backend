@@ -49,20 +49,20 @@ exports.getRawMaterialPreviousRequestByMSlug = asyncHandler(async (req, res) => 
     res.status(200).json({ data: request });
 });
 
-// // @desc Get Specific Raw Material Request by manufacturer name 
-// // @route GET /api/v1/rawMaterialPreviousRequest/manufacturer/slug/:slug
-// // @access Public
-// exports.getRawMaterialPreviousRequestByMName = asyncHandler(async (req, res) => {
-//     const { slug } = req.params;//take  slug from / :slug
+// @desc Get Specific Raw Material Request by manufacturer name 
+// @route GET /api/v1/rawMaterialPreviousRequest/manufacturerName/:manufacturerName
+// @access Public
+exports.getRawMaterialPreviousRequestByMName = asyncHandler(async (req, res) => {
+    const { manufacturerName } = req.params;
 
-//     const request = await RawMaterialPreviousRequestModel.findOne({ slug });
+    const request = await RawMaterialPreviousRequestModel.findOne({ manufacturerName: new RegExp(`^${manufacturerName}$`, "i") });
 
-//     //check if the request is null or undefined
-//     if (!request) {
-//         return res.status(404).json({ msg: `There is no Request for this manufacturer slug: ${slug}` });
-//     }
-//     res.status(200).json({ data: request });
-// });
+    //check if the request is null or undefined
+    if (!request) {
+        return res.status(404).json({ msg: `There is no Request for this manufacturer Name: ${manufacturerName}` });
+    }
+    res.status(200).json({ data: request });
+});
 
 // @desc Create Raw Material Request 
 // @route POST /api/v1/rawMaterialPreviousRequest
