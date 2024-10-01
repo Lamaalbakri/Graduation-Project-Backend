@@ -25,7 +25,7 @@ exports.getRawMaterialPreviousRequestById = asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ msg: 'Invalid ID format' });
     }
-    const request = await RawMaterialPreviousRequestModel.findById(id);
+    const request = await RawMaterialPreviousRequestModel.findOne({ shortId: id });
 
     //check if the request is null or undefined
     if (!request) {
@@ -70,6 +70,7 @@ exports.getRawMaterialPreviousRequestByMName = asyncHandler(async (req, res) => 
 exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
     const {
         _id,
+        shortId,
         manufacturerName,
         supplyingItems,
         quantity,
@@ -93,7 +94,11 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
         slug: slugify(manufacturerName),
     };
 
-    // إذا كان الـ _id موجودًا، نضيفه إلى البيانات المرسلة
+    // إذا كان الـ shortId موجودًا، نضيفه إلى البيانات المرسلة
+    if (shortId) {
+        rawMaterialRequestData.shortId = shortId;
+    }
+    // إذا كان الـ shortId موجودًا، نضيفه إلى البيانات المرسلة
     if (_id) {
         rawMaterialRequestData._id = _id;
     }
@@ -110,7 +115,7 @@ exports.updateRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const request = await RawMaterialPreviousRequestModel.findOneAndUpdate(
-        { _id: id },//identifier to find the request 
+        { shortId: id },//identifier to find the request 
         { status },//the data will update
         { new: true }//to return data after ubdate
     );
@@ -127,7 +132,7 @@ exports.updateRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
 // @access Private
 exports.deleteRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const request = await RawMaterialPreviousRequestModel.findByIdAndDelete(id);
+    const request = await RawMaterialPreviousRequestModel.findOneAndDelete({ shortId: id });
 
     //check if the request is null or undefined
     if (!request) {
