@@ -34,7 +34,6 @@ const assignTransporterSchema = new mongoose.Schema(
         },
         /*arrivalCity: {
             type: String,
-            //enum: ['Jeddah', 'Makkah', 'Taif', 'Riyadh', 'Al-Khobar', 'Abha'],
             required: true
         },*/
         departureCity: {
