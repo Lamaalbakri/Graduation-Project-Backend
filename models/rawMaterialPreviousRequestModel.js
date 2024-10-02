@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');//import mongoose 
+const { customAlphabet } = require('nanoid');
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
+const nanoid = customAlphabet(alphabet, 8); // ID بطول 8 خانات 
 
 //1-create schema
 const RawMaterialPreviousRequestSchema = new mongoose.Schema(
@@ -51,7 +54,12 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
         slug: {
             type: String,
             lowercase: true,
-        },
+        }, shortId: {
+            type: String,
+            unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
+            default: () => `m${nanoid()}`,
+            immutable: true // اجعل القيمة غير قابلة للتعديل
+        }
     },
     { timestamps: true }
 );
