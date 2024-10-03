@@ -6,8 +6,10 @@ const manufacturersService = require("../services/manufacturersService");
 const distributorsService = require("../services/distributorsService");
 const retailersService = require("../services/retailersService");
 
-router.route('/register').post(async (req, res) => {
+router.route('/').post(async (req, res) => {
   const { userType } = req.body;
+  console.log(`Registering ${userType}`);
+
 
   try {
     let result;

@@ -6,4 +6,3 @@ const router = express.Router();
 router.post('/', createTransportRequest);
 
 module.exports = router;
-  
