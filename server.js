@@ -10,6 +10,7 @@ const rawMaterialCurrentRequestRoute = require('./routes/rawMaterialCurrentReque
 const rawMaterialPreviousRequestRoute = require('./routes/rawMaterialPreviousRequestRoute')
 const assignTransporterRoute = require('./routes/assignTransporterRoute');
 const registerRoute = require('./routes/registerRoute');
+const loginRoute = require('./routes/loginRoute');
 
 //connect with DB
 dbConnection();
@@ -33,6 +34,7 @@ app.use('/api/v1/rawMaterialCurrentRequest', rawMaterialCurrentRequestRoute)
 app.use('/api/v1/rawMaterialPreviousRequest', rawMaterialPreviousRequestRoute)
 app.use('/api/v1/transportRequest', assignTransporterRoute);
 app.use('/api/v1/register', registerRoute);
+app.use('/api/v1/login', loginRoute);
 
 //get the port from config.env file
 const PORT = process.env.PORT || 8500;

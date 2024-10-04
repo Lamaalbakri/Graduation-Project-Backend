@@ -2,7 +2,7 @@ const ManufacturerModel = require("../models/manufacturersModel");
 const bcrypt = require("bcryptjs");
 
 const registerManufacturer = async (data) => {
-  const { full_name, email, phone_number, password, confirm_password, userType } = data;
+  const { full_name, email, phone_number, password, userType } = data;
 
   const existingManufacturer = await ManufacturerModel.findOne({ email });
   if (existingManufacturer) {
@@ -16,7 +16,6 @@ const registerManufacturer = async (data) => {
     email,
     phone_number,
     password: hashedPassword,
-    confirm_password: hashedPassword,
     userType
   });
 

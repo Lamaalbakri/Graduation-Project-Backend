@@ -2,7 +2,7 @@ const RetailerModel = require("../models/retailersModel");
 const bcrypt = require("bcryptjs");
 
 const registerRetailer = async (data) => {
-  const { full_name, email, phone_number, password, confirm_password, userType } = data;
+  const { full_name, email, phone_number, password, userType } = data;
 
   const existingRetailer = await RetailerModel.findOne({ email });
   if (existingRetailer) {
@@ -16,7 +16,6 @@ const registerRetailer = async (data) => {
     email,
     phone_number,
     password: hashedPassword,
-    confirm_password: hashedPassword,
     userType
   });
 

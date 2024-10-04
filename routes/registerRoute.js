@@ -10,7 +10,6 @@ router.route('/').post(async (req, res) => {
   const { userType } = req.body;
   console.log(`Registering ${userType}`);
 
-
   try {
     let result;
     switch (userType) {
@@ -41,4 +40,3 @@ router.route('/').post(async (req, res) => {
 });
 
 module.exports = router;
-

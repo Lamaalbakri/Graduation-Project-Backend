@@ -2,7 +2,7 @@ const TransporterModel = require("../models/transportersModel");
 const bcrypt = require("bcryptjs");
 
 const registerTransporter = async (data) => {
-  const { full_name, email, phone_number, password, confirm_password, userType } = data;
+  const { full_name, email, phone_number, password, userType } = data;
 
   const existingTransporter = await TransporterModel.findOne({ email });
   if (existingTransporter) {
@@ -16,7 +16,6 @@ const registerTransporter = async (data) => {
     email,
     phone_number,
     password: hashedPassword,
-    confirm_password: hashedPassword,
     userType
   });
 
