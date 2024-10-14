@@ -19,18 +19,29 @@ exports.getRawMaterialPreviousRequests = asyncHandler(async (req, res) => {
 // @route GET /api/v1/rawMaterialPreviousRequest/ :id
 // @access Public
 exports.getRawMaterialPreviousRequestById = asyncHandler(async (req, res) => {
-    const { id } = req.params;//take id from / :id
+    const { id } = req.params; // take id from / :id
 
-    //Check if the id is valid as an ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ msg: 'Invalid ID format' });
+    // تحقق مما إذا كان id فارغًا
+    if (!id || id.trim() === '') {
+        return res.status(400).json({ msg: 'ID is required.' });
     }
+
+    // تحقق من أن الشورت ID يتوافق مع النمط المحدد
+    const shortIdPattern = /^m[0-9a-z]{8}$/; // Regex for # followed by 8 characters (numbers or lowercase letters)
+
+    // تحقق من أن ID مكون من 9 أحرف
+    if (id.length !== 9 || !shortIdPattern.test(id)) {
+        return res.status(400).json({ msg: `Invalid shortId format: ${id}` });
+    }
+
+    // البحث باستخدام shortId
     const request = await RawMaterialPreviousRequestModel.findOne({ shortId: id });
 
-    //check if the request is null or undefined
+    // check if the request is null or undefined
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
     }
+
     res.status(200).json({ data: request });
 });
 
