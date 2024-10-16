@@ -3,6 +3,7 @@ const dotenv = require('dotenv');// import the dotenv library for environment va
 const morgan = require('morgan');//import morgan middleware for HTTP request 
 const cors = require('cors');
 
+
 //Load variables from config.env file
 dotenv.config({ path: 'config.env' });
 const dbConnection = require('./config/database');
@@ -11,6 +12,7 @@ const rawMaterialPreviousRequestRoute = require('./routes/rawMaterialPreviousReq
 const assignTransporterRoute = require('./routes/assignTransporterRoute');
 const registerRoute = require('./routes/registerRoute');
 const loginRoute = require('./routes/loginRoute');
+const protectedRoute = require('./routes/protectedRoute');
 
 //connect with DB
 dbConnection();
@@ -35,6 +37,7 @@ app.use('/api/v1/rawMaterialPreviousRequest', rawMaterialPreviousRequestRoute)
 app.use('/api/v1/transportRequest', assignTransporterRoute);
 app.use('/api/v1/register', registerRoute);
 app.use('/api/v1/login', loginRoute);
+app.use('/api/v1/protected', protectedRoute);
 
 //get the port from config.env file
 const PORT = process.env.PORT || 8500;

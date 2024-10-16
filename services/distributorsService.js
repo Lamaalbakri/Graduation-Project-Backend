@@ -1,6 +1,7 @@
 const DistributorModel = require("../models/distributorsModel");
 const bcrypt = require("bcryptjs");
 
+//create distributer
 const registerDistributor = async (data) => {
   const { full_name, email, phone_number, password, userType } = data;
 
@@ -23,6 +24,7 @@ const registerDistributor = async (data) => {
   res.status(201).json({ message: "Distributor registered successfully!" });
 };
 
+
 module.exports = {
-    registerDistributor,
+  registerDistributor,
 };
