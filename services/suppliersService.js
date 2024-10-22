@@ -20,7 +20,7 @@ const registerSupplier = async (data) => {
   });
 
   await newSupplier.save();
-  return { message: "Transporter registered successfully!" };
+  return { message: "Supplier registered successfully!" };
 };
 
 module.exports = {
