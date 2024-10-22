@@ -5,7 +5,11 @@ function verifyToken(req, res, next) {
     const token = req.headers['authorization'];
     if (!token) return res.status(403).send('No token provided.');
 
-    jwt.verify(token, getJwtSecret(), (err, decoded) => {
+    // add lama
+    // Extract the actual token (Bearer token)  
+    const bearerToken = token.split(' ')[1];
+
+    jwt.verify(bearerToken, getJwtSecret(), (err, decoded) => {
         if (err) return res.status(500).send('Failed to authenticate token.');
         req.userId = decoded.id;
         req.userType = decoded.userType;
