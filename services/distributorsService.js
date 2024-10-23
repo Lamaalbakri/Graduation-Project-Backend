@@ -20,8 +20,28 @@ const registerDistributor = async (data) => {
     userType
   });
 
-  await newDistributor.save();
-  res.status(201).json({ message: "Distributor registered successfully!" });
+  // await newDistributor.save();
+  // res.status(201).json({ message: "Distributor registered successfully!" });
+  //lamya
+  try {
+    // Attempt to save the new Distributor
+    await newDistributor.save();
+
+    // add lama
+    // Create JWT token
+    const token = createToken(newDistributor._id, 'distributor');
+
+    // Check if token creation was successful
+    if (!token) {
+      throw new Error("Failed to create token. Registration aborted.");
+    }
+
+    return { message: "Distributor registered successfully!", newDistributor, token };
+  } catch (error) {
+    // If there's an error, delete the Distributor from the database
+    await DistributorModel.deleteOne({ _id: newDistributor._id });
+    throw new Error(`Registration failed: ${error.message}`);
+  }
 };
 
 

@@ -11,7 +11,7 @@ const retailerSchema = new mongoose.Schema(
     shortId: {
       type: String,
       unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
-      default: () => `m${nanoid()}`,
+      default: () => `r${nanoid()}`,
       immutable: true // اجعل القيمة غير قابلة للتعديل
     },
     full_name: {

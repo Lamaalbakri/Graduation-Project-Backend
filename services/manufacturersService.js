@@ -19,10 +19,32 @@ const registerManufacturer = async (data) => {
     userType
   });
 
-  await newManufacturer.save();
-  return { message: "Manufacturer registered successfully!" };
+  // await newManufacturer.save();
+  // return { message: "Manufacturer registered successfully!" };
+
+  //lamya
+  try {
+    // Attempt to save the new manufacturer
+    await newManufacturer.save();
+    // res.status(201).json({ message: "manufacturer registered successfully!" });
+
+    // add lama
+    // Create JWT token
+    const token = createToken(newManufacturer._id, 'manufacturer');
+
+    // Check if token creation was successful
+    if (!token) {
+      throw new Error("Failed to create token. Registration aborted.");
+    }
+
+    return { message: "manufacturer registered successfully!", newManufacturer, token };
+  } catch (error) {
+    // If there's an error, delete the manufacturer from the database
+    await ManufacturerModel.deleteOne({ _id: newManufacturer._id });
+    throw new Error(`Registration failed: ${error.message}`);
+  }
 };
 
 module.exports = {
-    registerManufacturer,
+  registerManufacturer,
 };

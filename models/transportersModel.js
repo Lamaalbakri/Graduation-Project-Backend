@@ -8,7 +8,7 @@ const transporterSchema = new mongoose.Schema(
     shortId: {
       type: String,
       unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
-      default: () => `m${nanoid()}`,
+      default: () => `t${nanoid()}`,
       immutable: true // اجعل القيمة غير قابلة للتعديل
     },
     full_name: {
@@ -32,6 +32,6 @@ const transporterSchema = new mongoose.Schema(
       type: String,
       default: 'Transporter' // نوع المستخدم
     }
-});
+  });
 
 module.exports = mongoose.model('Transporters', transporterSchema);

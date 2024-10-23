@@ -19,8 +19,27 @@ const registerSupplier = async (data) => {
     userType
   });
 
-  await newSupplier.save();
-  return { message: "Supplier registered successfully!" };
+  // await newSupplier.save();
+  // return { message: "Supplier registered successfully!" };
+  //lamya
+  try {
+    // Attempt to save the new Supplier
+    await newSupplier.save();
+
+    // add lama
+    // Create JWT token
+    const token = createToken(newSupplier._id, 'supplier');
+    // Check if token creation was successful
+    if (!token) {
+      throw new Error("Failed to create token. Registration aborted.");
+    }
+
+    return { message: "Supplier registered successfully!", newSupplier, token };
+  } catch (error) {
+    // If there's an error, delete the Supplier from the database
+    await SupplierModel.deleteOne({ _id: newSupplier._id });
+    throw new Error(`Registration failed: ${error.message}`);
+  }
 };
 
 module.exports = {

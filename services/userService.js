@@ -5,7 +5,12 @@ const Transporter = require('../models/transportersModel');
 const Manufacturer = require('../models/manufacturersModel');
 const Distributor = require('../models/distributorsModel');
 const Retailer = require('../models/retailersModel');
-const { getJwtSecret } = require('../services/authService');
+const transportersService = require("../services/transportersService");
+const suppliersService = require("../services/suppliersService");
+const manufacturersService = require("../services/manufacturersService");
+const distributorsService = require("../services/distributorsService");
+const retailersService = require("../services/retailersService");
+const { getJwtSecret, createToken } = require('../services/authService');
 
 // Helper function to get the appropriate model based on user type
 function getModelByUserType(userType) {
@@ -44,13 +49,14 @@ async function login(req, res) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Incorrect password.' });
+      return res.status(401).json({ message: 'Incorrect password or email.' });
     }
 
     // Create a JWT token
-    const token = jwt.sign({ id: user._id, userType: userType }, getJwtSecret(), {
-      expiresIn: process.env.JWT_EXPIRE_TIME,
-    });
+    const token = createToken(user._id, userType);
+    // const token = jwt.sign({ id: user._id, userType: userType }, getJwtSecret(), {
+    //   expiresIn: process.env.JWT_EXPIRE_TIME,
+    // });
 
     return res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
@@ -58,6 +64,39 @@ async function login(req, res) {
   }
 }
 
+async function register(req, res) {
+  const { userType } = req.body;
+  console.log(`Registering ${userType}`);
+
+  try {
+    let result;
+    switch (userType) {
+      case "transporter":
+        result = await transportersService.registerTransporter(req.body);
+        break;
+      case "supplier":
+        result = await suppliersService.registerSupplier(req.body);
+        break;
+      case "manufacturer":
+        result = await manufacturersService.registerManufacturer(req.body);
+        break;
+      case "distributor":
+        result = await distributorsService.registerDistributor(req.body);
+        break;
+      case "retailer":
+        result = await retailersService.registerRetailer(req.body);
+        break;
+      default:
+        return res.status(400).json({ error: "Invalid user type." });
+    }
+
+    res.status(201).json(result);
+  } catch (error) {
+    console.error("Error in registration:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
 module.exports = {
-  login
+  login,
+  register
 };
