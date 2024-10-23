@@ -9,9 +9,11 @@ const {
   getMaterialByName
 } = require('../services/ManageRawMaterialService');
 
+const AuthService = require("../services/authService")
+
 const router = express.Router();
 
-router.route('/').get(getMaterials).post(createMaterial);
+router.route('/').get(getMaterials).post(AuthService.verifyToken, createMaterial);
 router
   .route('/:id')
   .get(getMaterialById)

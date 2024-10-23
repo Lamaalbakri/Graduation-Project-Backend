@@ -10,7 +10,7 @@ const suppliersService = require("../services/suppliersService");
 const manufacturersService = require("../services/manufacturersService");
 const distributorsService = require("../services/distributorsService");
 const retailersService = require("../services/retailersService");
-const { getJwtSecret, createToken } = require('../services/authService');
+const { createToken } = require('../services/authService');
 
 // Helper function to get the appropriate model based on user type
 function getModelByUserType(userType) {
@@ -64,6 +64,7 @@ async function login(req, res) {
   }
 }
 
+// Register method
 async function register(req, res) {
   const { userType } = req.body;
   console.log(`Registering ${userType}`);
