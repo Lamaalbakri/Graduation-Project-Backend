@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { getModelByUserType } = require('../services/userService');
 
 // Create a JWT token
 function createToken(userId, userType) {
@@ -35,14 +36,15 @@ function verifyToken(req, res, next) {
     }
 
     // Verify token
-    jwt.verify(token, getJwtSecret(), (err, decoded) => {
+    jwt.verify(token, getJwtSecret(), async (err, decoded) => {
         if (err) return res.status(500).send('Failed to authenticate token.');
-        
-        // Check if user exists
-        User.findById(decoded.id, (err, currentUser) => {
-            if (err) {
-                return res.status(500).send('Error fetching user.');
-            }
+
+        try {
+            // Get the appropriate model based on userType
+            const UserModel = getModelByUserType(decoded.userType);
+            // Check if user exists in the database
+            const currentUser = await UserModel.findById(decoded.id);
+            
             if (!currentUser) {
                 return res.status(401).send('The user that belongs to this token does not exist anymore.');
             }
@@ -50,7 +52,9 @@ function verifyToken(req, res, next) {
             req.userId = decoded.id;
             req.userType = decoded.userType;
             next();
-        });
+        } catch (error) {
+            return res.status(500).send('Error fetching user.');
+        }
     });
 }
 
