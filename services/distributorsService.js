@@ -1,4 +1,5 @@
 const DistributorModel = require("../models/distributorsModel");
+const { createToken } = require('../services/authService');
 const bcrypt = require("bcryptjs");
 
 //create distributer

@@ -1,4 +1,5 @@
 const SupplierModel = require("../models/suppliersModel");
+const { createToken } = require('../services/authService');
 const bcrypt = require("bcryptjs");
 
 const registerSupplier = async (data) => {

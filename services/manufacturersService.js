@@ -1,4 +1,5 @@
 const ManufacturerModel = require("../models/manufacturersModel");
+const { createToken } = require('../services/authService');
 const bcrypt = require("bcryptjs");
 
 const registerManufacturer = async (data) => {
