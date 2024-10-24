@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { getModelByUserType } = require('../services/userService');
+const { getModelByUserType } = require("../models/userModel");
 
 // Create a JWT token
 function createToken(userId, userType) {
@@ -8,23 +8,7 @@ function createToken(userId, userType) {
     });
 }
 
-/*function verifyToken(req, res, next) {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(403).send('No token provided.');
-
-    // add lama
-    // Extract the actual token (Bearer token)  
-    const bearerToken = token.split(' ')[1];
-
-    jwt.verify(bearerToken, getJwtSecret(), (err, decoded) => {
-        if (err) return res.status(500).send('Failed to authenticate token.');
-        req.userId = decoded.id;
-        req.userType = decoded.userType;
-        next();
-    });
-}*/
 function verifyToken(req, res, next) {
-    //console.log(req.headers);
 
     // Check if token exist
     let token;
@@ -37,23 +21,36 @@ function verifyToken(req, res, next) {
 
     // Verify token
     jwt.verify(token, getJwtSecret(), async (err, decoded) => {
-        if (err) return res.status(500).send('Failed to authenticate token.');
+        if (err) return res.status(500).send('Failed to authenticate token.'); // التوكن غير صالح أو انتهت صلاحيته
 
         try {
+            console.log("User type:", decoded.userType);
+            console.log("Decoded ID:", decoded.id);
+
             // Get the appropriate model based on userType
             const UserModel = getModelByUserType(decoded.userType);
-            // Check if user exists in the database
-            const currentUser = await UserModel.findById(decoded.id);
-            
-            if (!currentUser) {
-                return res.status(401).send('The user that belongs to this token does not exist anymore.');
-            }
+            console.log("UserModel after calling getModelByUserType:", UserModel);
 
-            req.userId = decoded.id;
-            req.userType = decoded.userType;
-            next();
+            // Check if user exists in the database
+            try {
+                const currentUser = await UserModel.findById(decoded.id); // البحث عن المستخدم في قاعدة البيانات
+                console.log("Current user:", currentUser);
+
+                if (!currentUser) {
+                    return res.status(401).send('The user that belongs to this token does not exist anymore.');
+                }
+
+                req.userId = decoded.id;
+                req.userType = decoded.userType;
+                next();
+
+            } catch (error) {
+                console.error("Error in findById:", error);
+                return res.status(500).send('Error fetching user: ' + error.message);
+            }
+            
         } catch (error) {
-            return res.status(500).send('Error fetching user.');
+            return res.status(500).send('Error fetching user.'); //  حدث خطأ أثناء جلب بيانات المستخدم من قاعدة البيانات
         }
     });
 }
