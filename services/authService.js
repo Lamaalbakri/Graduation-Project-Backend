@@ -1,27 +1,30 @@
 const jwt = require('jsonwebtoken');
+const asyncHandler = require('express-async-handler')
 const { getModelByUserType } = require("../models/userModel");
 
-// Create a JWT token
+//@desc Create a JWT token
 function createToken(userId, userType) {
     return jwt.sign({ id: userId, userType: userType }, getJwtSecret(), {
         expiresIn: process.env.JWT_EXPIRE_TIME,
     });
 }
 
+//@desc make sure that the user is logged in
 function verifyToken(req, res, next) {
 
     // Check if token exist
     let token;
-    if ( req.headers.authorization && req.headers.authorization.startsWith('Bearer') ) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+
     }
     if (!token) {
-        return res.status(403).send('No token provided.');
+        return res.status(401).send('You are not login, Please login to get access');
     }
 
     // Verify token
     jwt.verify(token, getJwtSecret(), async (err, decoded) => {
-        if (err) return res.status(500).send('Failed to authenticate token.'); // التوكن غير صالح أو انتهت صلاحيته
+        if (err) return res.status(500).send('Failed to authenticate token.'); //Token is invalid or expired
 
         try {
             console.log("User type:", decoded.userType);
@@ -39,7 +42,7 @@ function verifyToken(req, res, next) {
                 if (!currentUser) {
                     return res.status(401).send('The user that belongs to this token does not exist anymore.');
                 }
-
+                req.user = currentUser;
                 req.userId = decoded.id;
                 req.userType = decoded.userType;
                 next();
@@ -48,12 +51,24 @@ function verifyToken(req, res, next) {
                 console.error("Error in findById:", error);
                 return res.status(500).send('Error fetching user: ' + error.message);
             }
-            
+
         } catch (error) {
             return res.status(500).send('Error fetching user.'); //  حدث خطأ أثناء جلب بيانات المستخدم من قاعدة البيانات
         }
+        //check if user change his password after token created
     });
 }
+
+//ex: [manufacturer] 
+function allowedTo(...roles) {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.userType)) {
+            return res.status(403).send('You are not allowed to access this route');
+        }
+        next();
+    };
+};
+
 
 function getJwtSecret() {
     const secret = process.env.JWT_SECRET;
@@ -64,4 +79,4 @@ function getJwtSecret() {
 
     return secret;
 }
-module.exports = { verifyToken, getJwtSecret, createToken };
+module.exports = { verifyToken, getJwtSecret, createToken, allowedTo };
