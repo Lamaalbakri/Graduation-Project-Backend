@@ -37,7 +37,14 @@ async function login(req, res) {
     // Create a JWT token
     const token = createToken(user._id, userType);
 
-    return res.status(200).json({ message: 'Login successful', token });
+    res.cookie('token', token, {
+      httpOnly: true,       // يجعل الكوكي غير قابل للقراءة من جانب العميل
+      secure: true,         // الكوكي يُرسل فقط عبر HTTPS
+      sameSite: 'Strict',   // يحمي من هجمات CSRF
+      maxAge: 7200000       // مدة الصلاحية للكوكي
+    });
+
+    return res.status(200).json({ message: 'Login successful'});
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ message: 'Server error. Please try again later.' });

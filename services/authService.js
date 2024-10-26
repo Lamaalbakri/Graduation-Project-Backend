@@ -13,11 +13,8 @@ function createToken(userId, userType) {
 function verifyToken(req, res, next) {
 
     // Check if token exist
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1];
-
-    }
+    const token = req.cookies.token;
+    
     if (!token) {
         return res.status(401).send('You are not login, Please login to get access');
     }
