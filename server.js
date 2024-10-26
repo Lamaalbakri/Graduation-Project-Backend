@@ -24,8 +24,8 @@ dbConnection();
 const app = express();
 
 // Enable CORS for cross-origin requests
-app.use(cors({ 
-    origin: 'http://localhost:8500',
+app.use(cors({
+    origin: 'http://localhost:5173',
     credentials: true // Allow cookies to be sent via CORS
 }));
 
