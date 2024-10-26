@@ -31,10 +31,6 @@ const supplierSchema = new mongoose.Schema(
         userType: {
             type: String,
             default: 'Supplier'
-        },
-        category: {
-            type: String,
-            required: true // Make category required
         }
 
     });
