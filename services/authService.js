@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const asyncHandler = require('express-async-handler')
 const { getModelByUserType } = require("../models/userModel");
 
 //@desc Create a JWT token
@@ -65,7 +64,6 @@ function allowedTo(...roles) {
         next();
     };
 };
-
 
 function getJwtSecret() {
     const secret = process.env.JWT_SECRET;

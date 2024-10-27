@@ -90,16 +90,6 @@ async function register(req, res) {
   }
 }
 
-// function getOne(Model) {
-//   return asyncHandler(async (req, res, next) => {
-//     const { id } = req.params;
-//     const document = await Model.findById(id);
-//     if (!document) {
-//       return res.status(404).json({ error: "No document found for this id." });
-//     }
-//     res.status(200).json({ data: document });
-//   });
-// }
 
 const getOne = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
@@ -127,17 +117,42 @@ const getOne = asyncHandler(async (req, res, next) => {
   }
 });
 
-
-
 const getLoggedUserData = asyncHandler(async (req, res, next) => {
   req.params.id = req.user._id;
   req.query.userType = req.user.userType; // إضافة userType للطلب
   next();
 });
 
+// Update User method
+const updateUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { userType } = req.query;
+  console.log("Received userType:", userType);
+  console.log('Updating user with ID:', id);
+  console.log('Update data:', req.body);
+
+  try {
+    const UserModel = getModelByUserType(userType);
+
+    const updateData = req.body;
+
+    const updatedUser = await UserModel.findByIdAndUpdate(id, updateData, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.status(200).json({ message: `${userType} updated successfully.`, data: updatedUser });
+    console.log(`${userType} updated successfully.`, updatedUser);
+  } catch (error) {
+    console.error('Error updating:', error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
+
 module.exports = {
   login,
   register,
   getOne,
-  getLoggedUserData
+  getLoggedUserData,
+  updateUser
 };

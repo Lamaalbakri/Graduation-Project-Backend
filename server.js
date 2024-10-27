@@ -16,6 +16,7 @@ const registerRoute = require('./routes/registerRoute');
 const loginRoute = require('./routes/loginRoute');
 const protectedRoute = require('./routes/protectedRoute');
 const ManageRawMaterialRout = require("./routes/ManageRawMaterialsRouters");
+const userRoutes = require('./routes/userRoutes');
 
 // Connect with DB
 dbConnection();
@@ -48,6 +49,7 @@ app.use('/api/v1/register', registerRoute);
 app.use('/api/v1/login', loginRoute);
 app.use('/api/v1/protected', protectedRoute);
 app.use('/api/v1/manageRawMaterial', ManageRawMaterialRout)
+app.use('/api/v1/user', userRoutes);
 
 // Get the port from config.env file
 const PORT = process.env.PORT || 8500;
