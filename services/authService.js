@@ -14,7 +14,7 @@ function verifyToken(req, res, next) {
 
     // Check if token exist
     const token = req.cookies.token;
-    
+
     if (!token) {
         return res.status(401).send('You are not login, Please login to get access');
     }

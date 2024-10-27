@@ -44,7 +44,12 @@ async function login(req, res) {
       maxAge: 7200000       // مدة الصلاحية للكوكي
     });
 
-    return res.status(200).json({ message: 'Login successful'});
+    // إرجاع معلومات إضافية مع استجابة النجاح
+    return res.status(200).json({
+      message: 'Login successful',
+      userId: user._id,          // يمكنك إرجاع ID المستخدم
+      userRole: userType         // إرجاع نوع المستخدم
+    });
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ message: 'Server error. Please try again later.' });
