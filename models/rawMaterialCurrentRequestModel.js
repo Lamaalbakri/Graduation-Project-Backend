@@ -4,64 +4,252 @@ const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحرو�
 const nanoid = customAlphabet(alphabet, 8); // ID بطول 8 خانات 
 
 //1-create schema
+// const RawMaterialCurrentRequestSchema = new mongoose.Schema(
+//     {
+//         manufacturerId: {
+//             type: mongoose.Schema.Types.ObjectId, 
+//             required: true,
+//             ref: 'Manufacturer',
+//         },
+//         manufacturerName: {
+//             type: String,
+//             required: true,
+//         },
+//         supplyingItems: {
+//             type: [String],
+//             required: true,
+//         },
+//         quantity: {
+//             type: [Number],
+//             required: true,
+//         },
+//         price: {
+//             type: Number,
+//             required: true,
+//         },
+//         status: {
+//             type: String,
+//             enum: ['pending', 'accepted', 'inProgress', 'delivered', 'rejected'],
+//             default: 'pending',
+//         },
+//         // arrivalAddress: {
+//         //     street: "123 Main St",
+//         //     city: "example city",
+//         //     state: "example state",
+//         //     postalCode: "12345",
+//         //     country: "example country",
+//         // },
+//         arrivalCity: {
+//             type: String,
+//             required: true
+//         },
+//         transporterId: {
+//             type: mongoose.Schema.Types.ObjectId,
+//             //Uncomment when the Transporter model is available
+//             // required: true,
+//             // ref: 'Transporter'
+//         },
+//         notes: {
+//             type: String,
+//             default: '',
+//         },
+//         trackingInfo: {
+//             type: String,
+//             default: '',
+//         },
+//         slug: {
+//             type: String,
+//             lowercase: true,
+//         },
+//         shortId: {
+//             type: String,
+//             unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
+//             default: () => `m${nanoid()}`,
+//             immutable: true // اجعل القيمة غير قابلة للتعديل
+//         }
+
+//     },
+//     { timestamps: true }++++
+// );
+
+
 const RawMaterialCurrentRequestSchema = new mongoose.Schema(
     {
-        manufacturerId: {
-            type: mongoose.Schema.Types.ObjectId,
-            //Uncomment when the Manufacturer model is available
-            // required: true,
-            // ref: 'Manufacturer',
+        shortId: {// for the order it is extra with object id
+            type: String,
+            unique: true,
+            default: () => `m${nanoid()}`,
+            immutable: true,
         },
-        manufacturerName: {
+        supplierId: {//who will receive the order
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'Suppliers',
+        },
+        supplierName: {//who will receive the order
             type: String,
             required: true,
+            trim: true,
+            lowercase: true,
         },
-        supplyingItems: {
-            type: [String],
+        manufacturerId: {//who will send the order
+            type: mongoose.Schema.Types.ObjectId,
             required: true,
+            ref: 'Manufacturers',
         },
-        quantity: {
-            type: [Number],
+        manufacturerName: {//who will send the order
+            type: String,
             required: true,
+            trim: true,
+            lowercase: true,
         },
-        price: {
+        supplyingRawMaterials: [{
+            rawMaterial_id: {
+                type: String,
+                required: true,
+                trim: true,
+            },
+            rawMaterial_name: {
+                type: String,
+                required: true,
+                trim: true,
+            },
+            quantity: {
+                type: Number,
+                required: true,
+                min: 1,
+            },
+            unit_price: {
+                type: Number,
+                required: true,
+                min: 0,
+            },
+            subtotal: {
+                type: Number,
+                required: true,
+                min: 0,
+            },
+            unit: { // وحدة القياس
+                type: String,
+                required: true,
+                trim: true,
+            },
+            options: [ // الخيارات المرتبطة بالمادة الخام
+                {
+                    optionType: {
+                        type: String,
+                        trim: true,
+                    },
+                    values: [{
+                        type: String,
+                        trim: true,
+                    }]
+                }
+            ],
+        }],
+        total_price: {
             type: Number,
             required: true,
+            min: 0,
+        },
+        payment_method: {
+            type: String,
+            required: true,
+            trim: true,
         },
         status: {
             type: String,
             enum: ['pending', 'accepted', 'inProgress', 'delivered', 'rejected'],
             default: 'pending',
         },
-        arrivalCity: {
-            type: String,
-            required: true
+        arrivalAddress: {//manufacturer address
+            street: {
+                type: String,
+                required: true,
+                trim: true,
+                lowercase: true,
+            },
+            city: {
+                type: String,
+                required: true,
+                trim: true,
+                lowercase: true,
+            },
+            postal_code: {
+                type: String,
+                trim: true,
+            },
+            neighborhood: { // الحي
+                type: String,
+                required: true,
+                trim: true,
+                lowercase: true, // تحويل إلى أحرف صغيرة
+            },
+            country: {
+                type: String,
+                required: true,
+                trim: true,
+                lowercase: true,
+            },
+        },
+        departureAddress: {//supplier address
+            street: {
+                type: String,
+                trim: true,
+                lowercase: true,
+            },
+            city: {
+                type: String,
+                trim: true,
+                lowercase: true,
+            },
+            neighborhood: { // الحي
+                type: String,
+                trim: true,
+                lowercase: true, // تحويل إلى أحرف صغيرة
+            },
+            postal_code: {
+                type: String,
+                trim: true,
+            },
+            country: {
+                type: String,
+                trim: true,
+                lowercase: true,
+            },
         },
         transporterId: {
             type: mongoose.Schema.Types.ObjectId,
-            //Uncomment when the Transporter model is available
-            // required: true,
-            // ref: 'Transporter'
+            ref: 'Transporters',
+        },
+        transporterName: {
+            type: String,
+            trim: true,
+            lowercase: true,
+        },
+        estimated_delivery_date: {
+            type: Date,
+        },
+        actual_delivery_date: {
+            type: Date,
         },
         notes: {
             type: String,
             default: '',
+            trim: true,
         },
-        trackingInfo: {
+        tracking_number: {
             type: String,
-            default: '',
+            trim: true,
         },
-        slug: {
+        transportRequest_id: {
             type: String,
-            lowercase: true,
+            trim: true,
         },
-        shortId: {
+        contract_id: {
             type: String,
-            unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
-            default: () => `m${nanoid()}`,
-            immutable: true // اجعل القيمة غير قابلة للتعديل
-        }
-
+            trim: true,
+        },
     },
     { timestamps: true }
 );

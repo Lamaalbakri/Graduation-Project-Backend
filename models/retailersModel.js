@@ -2,10 +2,7 @@ const mongoose = require("mongoose");
 const { customAlphabet } = require('nanoid');
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
 const nanoid = customAlphabet(alphabet, 12); // ID بطول 8 خانات 
-////////////مهم
-//,trim: true , lowercase: true
-// required: [true, 'name required'] // مطلوب مع رسالة خطأ مخصصة
-//profileImg <type : string
+
 const retailerSchema = new mongoose.Schema(
   {
     shortId: {
@@ -16,17 +13,20 @@ const retailerSchema = new mongoose.Schema(
     },
     full_name: {
       type: String,
-      required: true
-
+      required: true,
+      trim: true // إزالة المسافات من البداية والنهاية
     },
     email: {
       type: String,
       unique: true,
-      required: true
+      required: true,
+      trim: true, // إزالة المسافات
+      lowercase: true // تحويل إلى أحرف صغيرة
     },
     phone_number: {
       type: String,
-      required: true
+      required: true,
+      trim: true // إزالة المسافات
     },
     password: {
       type: String,
@@ -35,7 +35,26 @@ const retailerSchema = new mongoose.Schema(
     userType: {
       type: String,
       default: 'Retailer' // نوع المستخدم
-    }
-  });
+    },
+    addresses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Address' // الربط مع كولكشن العناوين
+      }
+    ],
+    distributorsList: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Distributors' // الربط مع كولكشن الموردين
+      }
+    ],
+    manufacturersList: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Manufacturers' // الربط مع كولكشن المصانع
+      }
+    ]
+  }
+);
 
 module.exports = mongoose.model('Retailers', retailerSchema);
