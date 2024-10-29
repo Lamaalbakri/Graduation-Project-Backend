@@ -11,7 +11,7 @@ const dbConnection = require('./config/database');
 
 const rawMaterialCurrentRequestRoute = require('./routes/rawMaterialCurrentRequestRoute')
 const rawMaterialPreviousRequestRoute = require('./routes/rawMaterialPreviousRequestRoute')
-const assignTransporterRoute = require('./routes/assignTransporterRoute');
+// const assignTransporterRoute = require('./routes/assignTransporterRoute');
 const registerRoute = require('./routes/registerRoute');
 const loginRoute = require('./routes/loginRoute');
 const protectedRoute = require('./routes/protectedRoute');
@@ -44,7 +44,7 @@ if (process.env.NODE_ENV == 'development') {
 // Mount Route
 app.use('/api/v1/rawMaterialCurrentRequest', rawMaterialCurrentRequestRoute)
 app.use('/api/v1/rawMaterialPreviousRequest', rawMaterialPreviousRequestRoute)
-app.use('/api/v1/transportRequest', assignTransporterRoute);
+// app.use('/api/v1/transportRequest', assignTransporterRoute);
 app.use('/api/v1/register', registerRoute);
 app.use('/api/v1/login', loginRoute);
 app.use('/api/v1/protected', protectedRoute);
