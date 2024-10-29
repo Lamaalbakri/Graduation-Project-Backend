@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 //create distributer
 const registerDistributor = async (data) => {
-  const { full_name, email, phone_number, password, userType } = data;
+  const { full_name, email, phone_number, password, userType, category } = data;
 
   const existingDistributor = await DistributorModel.findOne({ email });
   if (existingDistributor) {
@@ -18,7 +18,8 @@ const registerDistributor = async (data) => {
     email,
     phone_number,
     password: hashedPassword,
-    userType
+    userType,
+    category
   });
 
   // await newDistributor.save();

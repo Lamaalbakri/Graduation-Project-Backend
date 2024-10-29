@@ -36,7 +36,7 @@ const supplierSchema = new mongoose.Schema({
         default: 'Supplier',
         trim: true // إزالة المسافات الزائدة
     },
-    Category: {
+    category: {
         type: String,
         default: "",
         trim: true // إزالة المسافات الزائدة

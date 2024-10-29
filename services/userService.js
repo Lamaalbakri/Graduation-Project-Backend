@@ -59,7 +59,9 @@ async function login(req, res) {
 // Register method
 async function register(req, res) {
   const { userType } = req.body;
+  const { category } = req.body;
   console.log(`Registering ${userType}`);
+  console.log(`Registering ${category}`);
 
   try {
     let result;

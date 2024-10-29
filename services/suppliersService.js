@@ -3,7 +3,7 @@ const { createToken } = require('../services/authService');
 const bcrypt = require("bcryptjs");
 
 const registerSupplier = async (data) => {
-  const { full_name, email, phone_number, password, userType } = data;
+  const { full_name, email, phone_number, password, userType, category } = data;
 
   const existingSupplier = await SupplierModel.findOne({ email });
   if (existingSupplier) {
@@ -17,7 +17,8 @@ const registerSupplier = async (data) => {
     email,
     phone_number,
     password: hashedPassword,
-    userType
+    userType,
+    category
   });
 
   // await newSupplier.save();
