@@ -15,14 +15,14 @@ const router = express.Router();
 //Routes
 router.route('/')
     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequests)
-    .post(authService.verifyToken, createRawMaterialCurrentRequest);
+    .post(authService.verifyToken, authService.allowedTo('manufacturer'), createRawMaterialCurrentRequest);
 router.route('/:id')
-    .get(getRawMaterialCurrentRequestById)
-    .put(updateRawMaterialCurrentRequest)
-    .delete(deleteRawMaterialCurrentRequest); // Define a special path for ObjectId
+    .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestById)
+    .put(authService.verifyToken, authService.allowedTo('supplier'), updateRawMaterialCurrentRequest)
+    .delete(authService.verifyToken, authService.allowedTo('supplier'), deleteRawMaterialCurrentRequest); // Define a special path for ObjectId
 router.route('/manufacturer/slug/:slug')
-    .get(getRawMaterialCurrentRequestByMSlug); // Path to search for manufacturer slug
+    .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestByMSlug); // Path to search for manufacturer slug
 router.route('/manufacturerName/:manufacturerName')
-    .get(getRawMaterialCurrentRequestByMName);
+    .get(authService.verifyToken, authService.allowedTo('supplier'), getRawMaterialCurrentRequestByMName);
 
 module.exports = router;
