@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const addressSchema = new mongoose.Schema({
+const AddressSchema = new mongoose.Schema({
     // address id :ObjectID will be created automatically.
     user_id: {//how own this address
         type: mongoose.Schema.Types.ObjectId, // إذا كنت تستخدم ObjectId
@@ -47,4 +47,6 @@ const addressSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Address', addressSchema);
+const AddressModel = mongoose.model('Addresses', AddressSchema);
+
+module.exports = AddressModel;
