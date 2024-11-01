@@ -3,66 +3,6 @@ const { customAlphabet } = require('nanoid');
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
 const nanoid = customAlphabet(alphabet, 8); // ID بطول 8 خانات 
 
-//1-create schema
-// const RawMaterialPreviousRequestSchema = new mongoose.Schema(
-//     {
-//         manufacturerId: {
-//             type: mongoose.Schema.Types.ObjectId,
-//             //Uncomment when the Manufacturer model is available
-//             // required: true,
-//             // ref: 'Manufacturer',
-//         },
-//         manufacturerName: {
-//             type: String,
-//             required: true,
-//         },
-//         supplyingItems: {
-//             type: [String],
-//             required: true,
-//         },
-//         quantity: {
-//             type: [Number],
-//             required: true,
-//         },
-//         price: {
-//             type: Number,
-//             required: true,
-//         },
-//         status: {
-//             type: String,
-//             enum: ['pending', 'accepted', 'inProgress', 'delivered', 'rejected'],
-//             default: 'pending',
-//         },
-//         arrivalCity: {
-//             type: String,
-//             required: true
-//         },
-//         transporterId: {
-//             type: mongoose.Schema.Types.ObjectId,
-//             //Uncomment when the Transporter model is available
-//             // required: true,
-//             // ref: 'Transporter'
-//         },
-//         notes: {
-//             type: String,
-//             default: '',
-//         },
-//         trackingInfo: {
-//             type: String,
-//             default: '',
-//         },
-//         slug: {
-//             type: String,
-//             lowercase: true,
-//         }, shortId: {
-//             type: String,
-//             unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
-//             default: () => `m${nanoid()}`,
-//             immutable: true // اجعل القيمة غير قابلة للتعديل
-//         }
-//     },
-//     { timestamps: true }
-// );
 
 const RawMaterialPreviousRequestSchema = new mongoose.Schema(
     {
@@ -118,12 +58,12 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
                 required: true,
                 min: 0,
             },
-            unit: { // وحدة القياس
+            unit: {
                 type: String,
                 required: true,
                 trim: true,
             },
-            options: [ // الخيارات المرتبطة بالمادة الخام
+            options: [
                 {
                     optionType: {
                         type: String,
@@ -168,11 +108,11 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
                 type: String,
                 trim: true,
             },
-            neighborhood: { // الحي
+            neighborhood: {
                 type: String,
                 required: true,
                 trim: true,
-                lowercase: true, // تحويل إلى أحرف صغيرة
+                lowercase: true,
             },
             country: {
                 type: String,
@@ -184,18 +124,21 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
         departureAddress: {//supplier address
             street: {
                 type: String,
+                required: true,
                 trim: true,
                 lowercase: true,
             },
             city: {
                 type: String,
+                required: true,
                 trim: true,
                 lowercase: true,
             },
-            neighborhood: { // الحي
+            neighborhood: {
                 type: String,
+                required: true,
                 trim: true,
-                lowercase: true, // تحويل إلى أحرف صغيرة
+                lowercase: true,
             },
             postal_code: {
                 type: String,
@@ -204,22 +147,27 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
             country: {
                 type: String,
                 trim: true,
+                required: true,
                 lowercase: true,
             },
         },
         transporterId: {
             type: mongoose.Schema.Types.ObjectId,
+            required: true,
             ref: 'Transporters',
         },
         transporterName: {
             type: String,
             trim: true,
             lowercase: true,
+            required: true,
         },
         estimated_delivery_date: {
+            required: true,
             type: Date,
         },
         actual_delivery_date: {
+            required: true,
             type: Date,
         },
         notes: {
@@ -232,6 +180,7 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
             trim: true,
         },
         transportRequest_id: {
+            required: true,
             type: String,
             trim: true,
         },

@@ -20,7 +20,7 @@ async function login(req, res) {
 
     // Find the user in the database
     const user = await UserModel.findOne({ email });
-    console.log('User found in the database');
+    // console.log('User found in the database');
 
     if (!user) {
       return res.status(404).json({ message: 'No user found with this email and user type.' });

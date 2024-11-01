@@ -27,29 +27,25 @@ exports.getRawMaterialCurrentRequestById = asyncHandler(async (req, res) => {
     const { id } = req.params; // take id from / :id
     const userType = req.user.userType;
     const userId = req.user._id;
-    console.log(userId)
 
+    //check if id is empty
     if (!id || id.trim() === '') {
         return res.status(400).json({ msg: 'ID is required.' });
     }
 
-    // تحقق من أن الشورت ID يتوافق مع النمط المحدد
+    // Check that the short ID matches the specified pattern.
     const shortIdPattern = /^m[0-9a-z]{8}$/; // Regex for # followed by 8 characters (numbers or lowercase letters)
 
-    // تحقق من أن ID مكون من 9 أحرف
+    // Check that the ID is 9 characters long.
     if (id.length !== 9 || !shortIdPattern.test(id)) {
-        console.log("مر من هنا")
         return res.status(400).json({ msg: `Invalid shortId format: ${id}` });
-
-
     }
 
-    // البحث باستخدام shortId
+    // Search using shortId
     const request = await RawMaterialCurrentRequestModel.findOne({ shortId: id });
 
     // check if the request is null or undefined
     if (!request) {
-        console.log("2مر من هنا")
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
     }
 
@@ -80,7 +76,7 @@ exports.getRawMaterialCurrentRequestByMSlug = asyncHandler(async (req, res) => {
         return res.status(404).json({ msg: `There is no Request for this manufacturer slug: ${slug}` });
     }
 
-    // تحقق مما إذا كان المستخدم هو المورد أو المصنع المرتبط بالطلب
+    // Check if the user is the supplier or manufacturer associated with the order
     if (
         (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) ||
         (userType === 'manufacturer' && request.manufacturerId.toString() !== userId.toString())
@@ -130,13 +126,13 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     //const manufacturerId= req.body.manufacturerId;
     const manufacturerName = req.body.manufacturerName;
     const supplyingRawMaterials = req.body.supplyingRawMaterials;
-    const total_price = req.body.total_price; // ستكون 0 إذا لم يتم إرسال هذا الحقل
+    const total_price = req.body.total_price;
     const payment_method = req.body.payment_method;
-    const status = req.body.status || 'pending'; // القيمة الافتراضية هي 'pending' إذا لم يتم إرسالها
+    const status = req.body.status || 'pending';
     const arrivalAddress = req.body.arrivalAddress;
     const departureAddress = req.body.departureAddress || null;
-    const transporterId = req.body.transporterId || null; // ستكون null إذا لم يتم إرسالها
-    const transporterName = req.body.transporterName || ''; // ستكون نص فارغ إذا لم يتم إرسالها
+    const transporterId = req.body.transporterId || null;
+    const transporterName = req.body.transporterName || '';
     const estimated_delivery_date = req.body.estimated_delivery_date;
     const actual_delivery_date = req.body.actual_delivery_date || null;
     const notes = req.body.notes || '';
@@ -144,15 +140,16 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const transportRequest_id = req.body.transportRequest_id || '';
     const contract_id = req.body.contract_id || ''
 
-    // تحقق من نوع المستخدم قبل إنشاء الطلب
+
     if (userType !== 'manufacturer') {
         return res.status(403).json({ msg: 'Access denied: Only manufacturers can create raw material requests.' });
     }
+
     //Async Await Syntax 
     const RawMaterialCurrentRequest = await RawMaterialCurrentRequestModel.create({
         supplierId,
         supplierName,
-        manufacturerId: userId, // الربط بالمصنع
+        manufacturerId: userId,
         manufacturerName,
         supplyingRawMaterials,
         total_price,
@@ -169,6 +166,7 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
         transportRequest_id,
         contract_id,
     });
+
     res.status(201).json({ data: RawMaterialCurrentRequest });
 
 });
@@ -183,22 +181,18 @@ exports.updateRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const userType = req.user.userType; // Get user type (supplier or manufacturer)
     const { status } = req.body;
 
-    // البحث عن الطلب للتحقق من ارتباطه بالمستخدم
+    // Find the request to check if it is related to the user
     const request = await RawMaterialCurrentRequestModel.findOne({ shortId: id });
 
-    // تحقق مما إذا كان الطلب موجودًا
+    // Check if the request exists
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
     }
 
-    // تحقق مما إذا كان المستخدم مرتبطًا بالطلب
-    if (
-        (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) ||
-        (userType === 'manufacturer' && request.manufacturerId.toString() !== userId.toString())
-    ) {
+    // Check if the user is associated with the request
+    if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
         return res.status(403).json({ msg: 'You do not have permission to access this request.' });
     }
-
 
     const updatedRequest = await RawMaterialCurrentRequestModel.findOneAndUpdate(
         { shortId: id },//identifier to find the request 
@@ -221,7 +215,7 @@ exports.deleteRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Get user ID
     const userType = req.user.userType; // Get user type (supplier or manufacturer)
 
-    // البحث عن الطلب للتحقق من ارتباطه بالمستخدم
+    // Find the request to check if it is related to the user
     const request = await RawMaterialCurrentRequestModel.findOne({ shortId: id });
 
     //check if the request is null or undefined
@@ -232,7 +226,7 @@ exports.deleteRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
         return res.status(403).json({ msg: 'Access denied: You do not have permission to delete this request.' });
     }
-    // حذف الطلب
+    //Delete request
     await RawMaterialCurrentRequestModel.findOneAndDelete({ shortId: id });
 
     res.status(204).send();

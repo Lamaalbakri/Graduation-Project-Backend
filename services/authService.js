@@ -23,17 +23,17 @@ function verifyToken(req, res, next) {
         if (err) return res.status(500).send('Failed to authenticate token.'); //Token is invalid or expired
 
         try {
-            console.log("User type:", decoded.userType);
-            console.log("Decoded ID:", decoded.id);
+            // console.log("User type:", decoded.userType);
+            // console.log("Decoded ID:", decoded.id);
 
             // Get the appropriate model based on userType
             const UserModel = getModelByUserType(decoded.userType);
-            console.log("UserModel after calling getModelByUserType:", UserModel);
+            // console.log("UserModel after calling getModelByUserType:", UserModel);
 
             // Check if user exists in the database
             try {
                 const currentUser = await UserModel.findById(decoded.id); // البحث عن المستخدم في قاعدة البيانات
-                console.log("Current user:", currentUser);
+                // console.log("Current user:", currentUser);
 
                 if (!currentUser) {
                     return res.status(401).send('The user that belongs to this token does not exist anymore.');

@@ -10,8 +10,13 @@ exports.getRawMaterialPreviousRequests = asyncHandler(async (req, res) => {
     // const page = req.query.page * 1 || 1;//To divide data into pages
     // const limit = req.query.limit * 1 || 5;//Number of data to appear on each page
     // const skip = (page - 1) * limit;//If I was on page  (2), I would skip the number of previous pages minus the page I am on multiplied by the number of data in it.
+    const userType = req.user.userType;
+    const userId = req.user._id;
 
-    const RawMaterialPreviousRequests = await RawMaterialPreviousRequestModel.find({});//.skip(skip).limit(limit)
+    // Filter requests based on userType
+    const filter = userType === 'manufacturer' ? { manufacturerId: userId } : { supplierId: userId };
+
+    const RawMaterialPreviousRequests = await RawMaterialPreviousRequestModel.find(filter);//.skip(skip).limit(limit)
     res.status(200).json({ data: RawMaterialPreviousRequests });//results: RawMaterialPreviousRequests.length, , page
 });
 
@@ -20,26 +25,37 @@ exports.getRawMaterialPreviousRequests = asyncHandler(async (req, res) => {
 // @access Public
 exports.getRawMaterialPreviousRequestById = asyncHandler(async (req, res) => {
     const { id } = req.params; // take id from / :id
+    const userType = req.user.userType;
+    const userId = req.user._id;
 
-    // تحقق مما إذا كان id فارغًا
+    //check if id is empty
     if (!id || id.trim() === '') {
         return res.status(400).json({ msg: 'ID is required.' });
     }
 
-    // تحقق من أن الشورت ID يتوافق مع النمط المحدد
+    // Check that the short ID matches the specified pattern
     const shortIdPattern = /^m[0-9a-z]{8}$/; // Regex for # followed by 8 characters (numbers or lowercase letters)
 
-    // تحقق من أن ID مكون من 9 أحرف
+    // Check that the ID is 9 characters long.
     if (id.length !== 9 || !shortIdPattern.test(id)) {
         return res.status(400).json({ msg: `Invalid shortId format: ${id}` });
     }
 
-    // البحث باستخدام shortId
+    // Search using shortId
     const request = await RawMaterialPreviousRequestModel.findOne({ shortId: id });
 
     // check if the request is null or undefined
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
+    }
+
+    // Check if the user is the supplier or manufacturer associated with the order
+    const hasAccess =
+        (userType === 'supplier' && request.supplierId.toString() === userId.toString()) ||
+        (userType === 'manufacturer' && request.manufacturerId.toString() === userId.toString());
+
+    if (!hasAccess) {
+        return res.status(401).json({ msg: 'You do not have permission to access this request.' });
     }
 
     res.status(200).json({ data: request });
@@ -50,6 +66,8 @@ exports.getRawMaterialPreviousRequestById = asyncHandler(async (req, res) => {
 // @access Public
 exports.getRawMaterialPreviousRequestByMSlug = asyncHandler(async (req, res) => {
     const { slug } = req.params;//take  slug from / :slug
+    const userType = req.user.userType; // Get user type (supplier or manufacturer)
+    const userId = req.user._id; // Get user ID
 
     const request = await RawMaterialPreviousRequestModel.findOne({ slug });
 
@@ -57,6 +75,15 @@ exports.getRawMaterialPreviousRequestByMSlug = asyncHandler(async (req, res) => 
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this manufacturer slug: ${slug}` });
     }
+
+    // Check if the user is the supplier or manufacturer associated with the order
+    if (
+        (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) ||
+        (userType === 'manufacturer' && request.manufacturerId.toString() !== userId.toString())
+    ) {
+        return res.status(403).json({ msg: 'You do not have permission to access this request.' });
+    }
+
     res.status(200).json({ data: request });
 });
 
@@ -65,51 +92,86 @@ exports.getRawMaterialPreviousRequestByMSlug = asyncHandler(async (req, res) => 
 // @access Public
 exports.getRawMaterialPreviousRequestByMName = asyncHandler(async (req, res) => {
     const { manufacturerName } = req.params;
+    const userType = req.user.userType; // Get user type (supplier or manufacturer)
+    const userId = req.user._id; // Get user ID
 
-    const request = await RawMaterialPreviousRequestModel.findOne({ manufacturerName: new RegExp(`^${manufacturerName}$`, "i") });
+    const requests = await RawMaterialPreviousRequestModel.findOne({ manufacturerName: new RegExp(`^${manufacturerName}$`, "i") });
 
     //check if the request is null or undefined
-    if (!request) {
-        return res.status(404).json({ msg: `There is no Request for this manufacturer Name: ${manufacturerName}` });
+    if (!requests) {
+        return res.status(404).json({ msg: `There is no requests for this manufacturer Name: ${manufacturerName}` });
     }
-    res.status(200).json({ data: request });
+
+    const accessibleRequests = requests.filter((request) =>
+        (userType === 'supplier' && request.supplierId.toString() === userId.toString()) ||
+        (userType === 'manufacturer' && request.manufacturerId.toString() === userId.toString())
+    );
+
+    if (accessibleRequests.length === 0) {
+        return res.status(403).json({ msg: 'You do not have permission to access these requests.' });
+    }
+
+    res.status(200).json({ data: accessibleRequests });
 });
 
 // @desc Create Raw Material Request 
 // @route POST /api/v1/rawMaterialPreviousRequest
 // @access Public
 exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
+    const userId = req.user._id; // Get user ID
+    const userType = req.user.userType; // Get user type (supplier or manufacturer)
+
     const {
         _id,
         shortId,
+        supplierId,
+        supplierName,
         manufacturerName,
-        supplyingItems,
-        quantity,
-        arrivalCity,
-        price,
+        manufacturerId,
+        supplyingRawMaterials,
+        total_price,
+        payment_method,
         status,
+        arrivalAddress,
+        departureAddress,
+        transporterId,
+        transporterName,
+        estimated_delivery_date,
+        actual_delivery_date,
         notes,
-        trackingInfo
+        tracking_number,
+        transportRequest_id,
+        contract_id,
     } = req.body;
 
     //Async Await Syntax 
     const rawMaterialRequestData = {
+        supplierId,
+        supplierName,
         manufacturerName,
-        supplyingItems,
-        quantity,
-        arrivalCity,
-        price,
+        manufacturerId,
+        supplyingRawMaterials,
+        total_price,
+        payment_method,
         status,
+        arrivalAddress,
+        departureAddress,
+        transporterId,
+        transporterName,
+        estimated_delivery_date,
+        actual_delivery_date,
         notes,
-        trackingInfo,
+        tracking_number,
+        transportRequest_id,
+        contract_id,
         slug: slugify(manufacturerName),
     };
 
-    // إذا كان الـ shortId موجودًا، نضيفه إلى البيانات المرسلة
+    // If the shortId exists, we add it to the transmitted data.
     if (shortId) {
         rawMaterialRequestData.shortId = shortId;
     }
-    // إذا كان الـ shortId موجودًا، نضيفه إلى البيانات المرسلة
+    // If the _id exists, we add it to the transmitted data.
     if (_id) {
         rawMaterialRequestData._id = _id;
     }
@@ -124,8 +186,24 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
 // @access Private
 exports.updateRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const userId = req.user._id; // Get user ID
+    const userType = req.user.userType; // Get user type (supplier or manufacturer)
     const { status } = req.body;
-    const request = await RawMaterialPreviousRequestModel.findOneAndUpdate(
+
+    // Find the request to check if it is related to the user
+    const request = await RawMaterialPreviousRequestModel.findOne({ shortId: id });
+
+    // Check if the request exists
+    if (!request) {
+        return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
+    }
+
+    // Check if the user is associated with the request
+    if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
+        return res.status(403).json({ msg: 'You do not have permission to access this request.' });
+    }
+
+    const updatedRequest = await RawMaterialPreviousRequestModel.findOneAndUpdate(
         { shortId: id },//identifier to find the request 
         { status },//the data will update
         { new: true }//to return data after ubdate
@@ -135,7 +213,7 @@ exports.updateRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
     }
-    res.status(200).json({ data: request });
+    res.status(200).json({ data: updatedRequest });
 });
 
 // @desc Delete Specific Raw Material Request 
@@ -143,11 +221,23 @@ exports.updateRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
 // @access Private
 exports.deleteRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const request = await RawMaterialPreviousRequestModel.findOneAndDelete({ shortId: id });
+    const userId = req.user._id; // Get user ID
+    const userType = req.user.userType; // Get user type (supplier or manufacturer)
+
+    // Find the request to check if it is related to the user
+    const request = await RawMaterialPreviousRequestModel.findOne({ shortId: id });
 
     //check if the request is null or undefined
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
     }
+
+    if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
+        return res.status(403).json({ msg: 'Access denied: You do not have permission to delete this request.' });
+    }
+
+    //Delete request
+    await RawMaterialPreviousRequestModel.findOneAndDelete({ shortId: id });
+
     res.status(204).send();
 });
