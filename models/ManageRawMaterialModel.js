@@ -96,27 +96,25 @@ const ManageRawMaterialSchema = new mongoose.Schema({
     default: () => nanoid(),
     immutable: true, // اجعل القيمة غير قابلة للتعديل
   },
+
   supplierId: {
     type: mongoose.Schema.Types.ObjectId, // معرف المورد
     ref: 'Suppliers', // اسم الكولكشن المرتبطة
-    required: true, // اجعلها مطلوبة
+    required: false, //need to set it to false until Supplier collection is created . Otherwise, error
   },
-  options: [
-    {
-      optionType: {
-        type: String,
-        // لا تجعلها مطلوبة، لذا يمكن أن تكون فارغة في حال عدم وجود خيارات
-      },
-      values: [
-        {
-          type: String,
-          // لا تجعلها مطلوبة أيضاً
-        }
-      ],
-    }
-  ],
-  unit: {// gram ,liter..etc
-    type: String,
+  
+  materialOption: [{
+    optionName: {
+      type: String,
+    },
+    menuList: {
+      type: [String],
+      default: [],
+    },
+  }],
+
+  units: {// gram ,liter..etc
+    type: [String],
     required: true,
     trim: true // إزالة المسافات في البداية والنهاية
   }
