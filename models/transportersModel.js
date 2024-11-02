@@ -1,39 +1,39 @@
 const mongoose = require("mongoose");
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
-const nanoid = customAlphabet(alphabet, 12); // ID بطول 12 خانات 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; 
+const nanoid = customAlphabet(alphabet, 12); 
 
 const transporterSchema = new mongoose.Schema({
   shortId: {
     type: String,
-    unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
+    unique: true,
     default: () => `t${nanoid()}`,
-    immutable: true // اجعل القيمة غير قابلة للتعديل
+    immutable: true 
   },
   full_name: {
     type: String,
     required: true,
-    trim: true // إزالة المسافات من البداية والنهاية
+    trim: true 
   },
   email: {
     type: String,
     unique: true,
     required: true,
-    trim: true, // إزالة المسافات من البداية والنهاية
-    lowercase: true // تحويل البريد الإلكتروني إلى أحرف صغيرة
+    trim: true, 
+    lowercase: true 
   },
   phone_number: {
     type: String,
     required: true,
-    trim: true // إزالة المسافات من البداية والنهاية
+    trim: true 
   },
   password: {
     type: String,
-    required: true // يمكن هنا تجنب `trim` نظرًا لأن كلمة المرور قد تتطلب مسافات
+    required: true 
   },
   userType: {
     type: String,
-    default: 'Transporter' // نوع المستخدم
+    default: 'Transporter'
   }
 });
 

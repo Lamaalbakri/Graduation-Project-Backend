@@ -1,7 +1,6 @@
 const TransporterModel = require("../models/transportersModel");
+const asyncHandler = require('express-async-handler')
 const bcrypt = require("bcryptjs");
-// add lama
-const jwt = require('jsonwebtoken');
 const { createToken } = require('../services/authService');
 
 const registerTransporter = async (data) => {
@@ -23,16 +22,13 @@ const registerTransporter = async (data) => {
     password: hashedPassword,
     userType
   });
-  //lamya
+ 
   try {
     // Attempt to save the new transporter
     await newTransporter.save();
 
-    // add lama
     // Create JWT token
     const token = createToken(newTransporter._id, 'transporter');
-    // const token = jwt.sign({ id: newTransporter._id, userType: 'transporter' },
-    //   getJwtSecret(), { expiresIn: process.env.JWT_EXPIRE_TIME });
 
     // Check if token creation was successful
     if (!token) {
@@ -47,6 +43,51 @@ const registerTransporter = async (data) => {
   }
 };
 
+// get the names of transportation companies 
+/*const getTransporters = asyncHandler(async (req, res) => {
+  const userType = req.user.userType;
+  const userId = req.user._id;
+
+  if (!['manufacturer', 'supplier', 'distributor'].includes(userType)) {
+    return res.status(403).json({ message: "Access denied: user type not authorized." });
+  }
+
+  // Filter requests based on userType
+  const filter = 
+  userType === 'manufacturer' ? { manufacturerId: userId } :
+  userType === 'supplier' ? { supplierId: userId } :
+  { distributorId: userId };
+
+  console.log("Filter used:", filter);
+
+  const transporters = await TransporterModel.find(filter);
+
+  if (!transporters.length) {
+    console.log("No transporters found for filter:", filter);
+    return res.status(404).json({ message: "No transporters found" });
+  }
+
+  res.status(200).json({ data: transporters });
+});*/
+
+// get the names of transportation companies
+const getTransporters = asyncHandler(async (req, res) => {
+  try {
+    const transporters = await TransporterModel.find({});
+
+    if (!transporters.length) {
+      console.log("No transporters found.");
+      return res.status(404).json({ message: "No transporters found" });
+    }
+
+    res.status(200).json({ data: transporters });
+  } catch (error) {
+    console.error("Error fetching transporters:", error);
+    res.status(500).json({ message: "Server error fetching transporters." });
+  }
+});
+
 module.exports = {
   registerTransporter,
+  getTransporters,
 };
