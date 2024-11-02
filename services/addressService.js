@@ -1,23 +1,22 @@
-const slugify = require('slugify');
+const { getModelByUserType } = require('../models/userModel');
 const asyncHandler = require('express-async-handler')
 const AddressModel = require('../models/addressSchema');
-const mongoose = require('mongoose');
 
-// @desc Get Specific Address by ID for authorized User
+// @desc Get Specific Address by user ID for authorized User
 // @route GET /api/v1/addresses/:id
 // @access Private
-exports.getAddressById = asyncHandler(async (req, res) => {
-    const { id } = req.params; // Get the address ID from the route parameters
+exports.getAddressByUserId = asyncHandler(async (req, res) => {
+    //const { id } = req.params; // Get the user ID from the route parameters
     const userType = req.user.userType; // Get user type from the token
     const userId = req.user._id; // Get user ID from the token
 
-    // Validate that the ID is provided
-    if (!id || id.trim() === '') {
-        return res.status(400).json({ msg: 'ID is required.' });
-    }
+    // // Validate that the ID is provided
+    // if (!id || id.trim() === '') {
+    //     return res.status(400).json({ msg: 'ID is required.' });
+    // }
 
     // Find the address by ID, ensuring it belongs to the authenticated user
-    const address = await AddressModel.findOne({ _id: id, user_id: userId, user_type: userType });
+    const address = await AddressModel.findOne({ user_id: userId, user_type: userType });
 
     // If the address is not found, return an error
     if (!address) {
@@ -37,6 +36,9 @@ exports.createAddress = asyncHandler(async (req, res) => {
     const userType = req.user.userType; // Retrieve user type from token
     const { street, city, neighborhood, postal_code, country, is_default } = req.body;
 
+    // Find the appropriate model based on user type
+    const UserModel = getModelByUserType(userType);
+
     // Create a new address and link it to the authenticated user
     const newAddress = await AddressModel.create({
         user_id: userId,
@@ -48,6 +50,13 @@ exports.createAddress = asyncHandler(async (req, res) => {
         country,
         is_default
     });
+
+    // Update the user's addresses list with the new address ID
+    await UserModel.findByIdAndUpdate(
+        userId,
+        { $addToSet: { addresses: newAddress._id } }, // استخدم $addToSet لتجنب التكرار
+        { new: true }
+    );
 
     // Respond with the newly created address
     res.status(201).json({ msg: 'Address created successfully', data: newAddress });
