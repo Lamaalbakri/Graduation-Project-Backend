@@ -80,12 +80,12 @@ exports.getMaterialByNameOrId = async (req, res) => {
         .json({ message: `There is no raw material for this query: ${query}` });
     }
     const hasAccess =
-    userType === "supplier" && request.supplierId.toString() === userId.toString();
+      userType === "supplier" && request.supplierId.toString() === userId.toString();
 
-  if (!hasAccess) {
-    return res
-      .status(401).json({ msg: "You do not have permission to access this request." });
-  }
+    if (!hasAccess) {
+      return res
+        .status(401).json({ msg: "You do not have permission to access this request." });
+    }
 
     res.status(200).json({ success: true, data: material });
   } catch (error) {
@@ -97,7 +97,11 @@ exports.getMaterialByNameOrId = async (req, res) => {
 // @route PIST /api/v1/ManageRawMaterial
 // @accesss Privete
 exports.createMaterial = async (req, res) => {
+
   console.log("createMaterial", req.body);
+  const userType = req.user.userType;
+  const supplierId = req.user._id;
+
 
   // req.body.slug = slugify(req.body.name);
   // console.log('createMaterial',req.body);
@@ -121,6 +125,7 @@ exports.createMaterial = async (req, res) => {
       quantity,
       description,
       storageInfo,
+      supplierId,
       price,
       image,
       materialOption, // Add materialOption to the model
@@ -158,10 +163,10 @@ exports.updateMaterial = async (req, res) => {
     if (!material) {
       res.status(404).json({ msg: `No Material for this id ${shortId}` });
     }
-     // Check if the user is associated with the request
-     if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
+    // Check if the user is associated with the request
+    if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
       return res.status(403).json({ msg: 'You do not have permission to access this request.' });
-  }
+    }
     res.status(200).json({ success: true, data: material });
   } catch (error) {
     console.error("Error updating material:", error);
@@ -187,10 +192,10 @@ exports.deleteRawMaterial = async (req, res) => {
         .status(404)
         .json({ message: `No Material found with shortId ${shortId}` });
     }
-     // Check if the user is associated with the request
-     if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
+    // Check if the user is associated with the request
+    if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
       return res.status(403).json({ msg: 'You do not have permission to access this request.' });
-  }
+    }
 
     return res
       .status(200)

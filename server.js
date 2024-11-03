@@ -20,6 +20,8 @@ const protectedRoute = require('./routes/protectedRoute');
 const ManageRawMaterialRout = require("./routes/ManageRawMaterialsRouters");
 const userRoutes = require('./routes/userRoutes');
 const addressRoute = require('./routes/addressRoute');
+const shoppingBasketRoute = require('./routes/shoppingBasketRoute');
+
 
 // Connect with DB
 dbConnection();
@@ -56,6 +58,7 @@ app.use('/api/v1/protected', protectedRoute);
 app.use('/api/v1/manageRawMaterial', ManageRawMaterialRout)
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/address', addressRoute);
+app.use('/api/v1/shoppingBasket', shoppingBasketRoute);
 
 // Get the port from config.env file
 const PORT = process.env.PORT || 8500;

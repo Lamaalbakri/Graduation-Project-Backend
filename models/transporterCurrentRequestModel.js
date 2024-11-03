@@ -23,7 +23,7 @@ const TransporterCurrentRequestSchema = new mongoose.Schema(
         sender_type: {
             type: String,
             required: true,
-            enum: ['Suppliers', 'Manufacturers', 'Distributors'],
+            enum: ['supplier', 'manufacturer', 'distributor'],
             trim: true,
         },
         receiver_id: { // The ID of the stakeholder who will receive the request from the transporter
@@ -34,7 +34,7 @@ const TransporterCurrentRequestSchema = new mongoose.Schema(
         receiver_type: {
             type: String,
             required: true,
-            enum: ['Manufacturers', 'Distributors', 'Retailers'],
+            enum: ['manufacturer', 'distributor', 'retailer'],
             trim: true,
         },
         transporterId: { // The ID of  transporter responsible for the request
@@ -66,7 +66,7 @@ const TransporterCurrentRequestSchema = new mongoose.Schema(
             min: 0,
         },
         estimated_delivery_date: {
-            type: [Date], 
+            type: [Date],
             required: true
         },
         actual_delivery_date: {
@@ -94,7 +94,7 @@ const TransporterCurrentRequestSchema = new mongoose.Schema(
                 type: String,
                 trim: true,
             },
-            neighborhood: { 
+            neighborhood: {
                 type: String,
                 required: true,
                 trim: true,
@@ -141,7 +141,7 @@ const TransporterCurrentRequestSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-        contract_id: { 
+        contract_id: {
             type: String,
             trim: true,
         },

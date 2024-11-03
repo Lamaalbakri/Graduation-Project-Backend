@@ -19,7 +19,7 @@ exports.getTransporterCurrentRequest = asyncHandler(async (req, res) => {
     } catch (error) {
         res.status(500).json({ msg: 'Error retrieving requests', error: error.message });
     }
-    
+
 });
 
 exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
@@ -28,8 +28,8 @@ exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
     const userType = req.user.userType; // Get user type 
 
     const request_id = req.body.request_id;
-    const senderId = req.body.senderId;
-    const sender_type = req.body.sender_type;
+    // const senderId = req.body.senderId;
+    // const sender_type = req.body.sender_type;
     const receiver_id = req.body.receiver_id;
     const receiver_type = req.body.receiver_type;
     const transporterId = req.body.transporterId;
@@ -41,7 +41,7 @@ exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
     const estimated_delivery_date = req.body.estimated_delivery_date;
     const actual_delivery_date = req.body.actual_delivery_date || null;
     const status = req.body.status || 'pending';
-    const arrivalAddress = req.body.arrivalAddress || null;
+    const arrivalAddress = req.body.arrivalAddress;
     const departureAddress = req.body.departureAddress;
     const tracking_number = req.body.tracking_number || '';
     const contract_id = req.body.contract_id || '';
@@ -50,11 +50,11 @@ exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
         return res.status(403).json({ msg: 'Access denied: Only suppliers, manufacturers, and distributors can create transport requests.' });
     }
 
-    try{
+    try {
         const TransporterCurrentRequest = await TransporterCurrentRequestModel.create({
             request_id,
             senderId: userId,
-            sender_type,
+            sender_type: userType,
             receiver_id,
             receiver_type,
             transporterId,
@@ -70,10 +70,10 @@ exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
             departureAddress,
             tracking_number,
             contract_id,
-            });
-        
-            res.status(201).json({ data: TransporterCurrentRequest });
-    } catch (error){
+        });
+
+        res.status(201).json({ data: TransporterCurrentRequest });
+    } catch (error) {
         console.error('Error creating transport request:', error);
         return res.status(400).json({ msg: 'Validation Error', errors: error.errors });
         throw error;
