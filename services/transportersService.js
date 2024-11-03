@@ -43,33 +43,6 @@ const registerTransporter = async (data) => {
   }
 };
 
-// get the names of transportation companies 
-/*const getTransporters = asyncHandler(async (req, res) => {
-  const userType = req.user.userType;
-  const userId = req.user._id;
-
-  if (!['manufacturer', 'supplier', 'distributor'].includes(userType)) {
-    return res.status(403).json({ message: "Access denied: user type not authorized." });
-  }
-
-  // Filter requests based on userType
-  const filter = 
-  userType === 'manufacturer' ? { manufacturerId: userId } :
-  userType === 'supplier' ? { supplierId: userId } :
-  { distributorId: userId };
-
-  console.log("Filter used:", filter);
-
-  const transporters = await TransporterModel.find(filter);
-
-  if (!transporters.length) {
-    console.log("No transporters found for filter:", filter);
-    return res.status(404).json({ message: "No transporters found" });
-  }
-
-  res.status(200).json({ data: transporters });
-});*/
-
 // get the names of transportation companies
 const getTransporters = asyncHandler(async (req, res) => {
   try {

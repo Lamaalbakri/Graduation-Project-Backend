@@ -9,23 +9,33 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        request_id: { // id الطلب
+        request_id: { // The request id that will come to the transporter ( #m - #d - #r)
+            type: String,
+            required: true,
+        },
+        senderId: { // The ID of the stakeholder who sent the request to the transporter
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            trim: true,
+            refPath: 'sender_type',
         },
-        senderId: { // id الذي أرسل الطلب
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            refPath: 'user_type', // تحديد الكوليكشن بناءً على قيمة user_type
-        },
-        user_type: {
+        sender_type: {
             type: String,
             required: true,
             enum: ['supplier', 'manufacturer', 'distributor'],
             trim: true,
         },
-        transporterId: { // الناقل المسؤول عن الطلب
+        receiver_id: { // The ID of the stakeholder who will receive the request from the transporter
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            refPath: 'receiver_type',
+        },
+        receiver_type: {
+            type: String,
+            required: true,
+            enum: ['manufacturer', 'distributor', 'retailer'],
+            trim: true,
+        },
+        transporterId: { // The ID of  transporter responsible for the request
             type: mongoose.Schema.Types.ObjectId,
             required: true,
             ref: 'Transporters',
@@ -51,20 +61,22 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
         totalPrice: {
             type: Number,
             required: true,
+            min: 0,
         },
         estimated_delivery_date: {
-            type: [Date],  // مصفوفة من التواريخ
+            type: [Date], 
             required: true
         },
         actual_delivery_date: {
             type: Date,
+            required: true,
         },
         status: {
             type: String,
-            enum: ['pending', 'inProgress', 'delivered', 'rejected'],
-            default: 'pending',
+            enum: ['delivered', 'rejected'],
+            required: true,
         },
-        arrivalAddress: {  // عنوان الوصول (مثلاً للمصنع أو المزود)
+        arrivalAddress: {  // Arrival address (e.g. manufacturer, distributor, or retailer)
             street: {
                 type: String,
                 required: true,
@@ -94,7 +106,7 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
                 lowercase: true,
             },
         },
-        departureAddress: { // عنوان المغادرة (مثلاً المورد أو المصنع)
+        departureAddress: { // Departure address (e.g. supplier, manufacturer, or distributor)
             street: {
                 type: String,
                 required: true,
@@ -124,15 +136,16 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
                 lowercase: true,
             },
         },
-        tracking_number: { // رقم التتبع الخاص بالشحنة
+        tracking_number: { // Tracking number for the shipment
             type: String,
             trim: true,
         },
-        contract_id: { // معرف العقد إذا كانت الشحنة تتطلب اتفاقية نقل
+        contract_id: { 
             type: String,
             trim: true,
         },
-    }
+    },
+    { timestamps: true }
 )
 
 const TransporterPreviousRequestModel = mongoose.model('Transporter-Previous-Request', TransporterPreviousRequestSchema);

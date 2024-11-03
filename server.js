@@ -13,6 +13,7 @@ const rawMaterialCurrentRequestRoute = require('./routes/rawMaterialCurrentReque
 const rawMaterialPreviousRequestRoute = require('./routes/rawMaterialPreviousRequestRoute')
 // const assignTransporterRoute = require('./routes/assignTransporterRoute');
 const transportRequestsRoute = require('./routes/transportRequestsRoute');
+const transporterCurrentRequestRoute = require('./routes/transporterCurrentRequestRoute');
 const registerRoute = require('./routes/registerRoute');
 const loginRoute = require('./routes/loginRoute');
 const protectedRoute = require('./routes/protectedRoute');
@@ -48,6 +49,7 @@ app.use('/api/v1/rawMaterialCurrentRequest', rawMaterialCurrentRequestRoute)
 app.use('/api/v1/rawMaterialPreviousRequest', rawMaterialPreviousRequestRoute)
 // app.use('/api/v1/transportRequest', assignTransporterRoute);
 app.use('/api/v1/transportRequests', transportRequestsRoute);
+app.use('/api/v1/transportCurrentRequest', transporterCurrentRequestRoute)
 app.use('/api/v1/register', registerRoute);
 app.use('/api/v1/login', loginRoute);
 app.use('/api/v1/protected', protectedRoute);
