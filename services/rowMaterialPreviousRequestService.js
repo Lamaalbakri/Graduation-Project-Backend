@@ -241,3 +241,9 @@ exports.deleteRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
 
     res.status(204).send();
 });
+
+exports.getRawMaterialPreviousRequestsforManufacturer = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const RawMaterialCurrentRequests = await RawMaterialPreviousRequestModel.find({ manufacturerId: id });
+    res.status(200).json({ data: RawMaterialCurrentRequests });
+});

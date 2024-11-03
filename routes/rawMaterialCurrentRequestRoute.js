@@ -6,7 +6,8 @@ const { getRawMaterialCurrentRequests,
     getRawMaterialCurrentRequestByMSlug,
     updateRawMaterialCurrentRequest,
     deleteRawMaterialCurrentRequest,
-    getRawMaterialCurrentRequestByMName
+    getRawMaterialCurrentRequestByMName,
+    getRawMaterialCurrentRequestsforManufacturer
 } = require('../services/rowMaterialCurrentRequestService');
 
 
@@ -25,4 +26,7 @@ router.route('/manufacturer/slug/:slug')
 router.route('/manufacturerName/:manufacturerName')
     .get(authService.verifyToken, authService.allowedTo('supplier'), getRawMaterialCurrentRequestByMName);
 
+    //give all curren request to the spicefic manufacturer id 
+router.route('/manufacturer/:id')
+    .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestsforManufacturer)
 module.exports = router;

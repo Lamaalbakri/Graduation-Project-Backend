@@ -6,7 +6,9 @@ const { getRawMaterialPreviousRequests,
     getRawMaterialPreviousRequestByMSlug,
     updateRawMaterialPreviousRequest,
     deleteRawMaterialPreviousRequest,
-    getRawMaterialPreviousRequestByMName
+    getRawMaterialPreviousRequestByMName,
+    getRawMaterialPreviousRequestsforManufacturer
+
 } = require('../services/rowMaterialPreviousRequestService');
 
 
@@ -24,6 +26,9 @@ router.route('/manufacturer/slug/:slug')
     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialPreviousRequestByMSlug); // Path to search for manufacturer slug
 router.route('/manufacturerName/:manufacturerName')
     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialPreviousRequestByMName);
+
+router.route('/manufacturer/:id')
+    .get(authService.verifyToken, getRawMaterialPreviousRequestsforManufacturer)
 
 
 module.exports = router;

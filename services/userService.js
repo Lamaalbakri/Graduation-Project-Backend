@@ -119,6 +119,35 @@ const getOne = asyncHandler(async (req, res, next) => {
   }
 });
 
+
+// bring all the supplier list in the view page 
+const getOneWithSupplier = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { userType } = req.query; // نوع المستخدم يمكن أن يتم تمريره في الـ query
+
+  try {
+    // احصل على الموديل بناءً على نوع المستخدم
+    const UserModel = getModelByUserType(userType);
+    console.log(`Retrieved model for userType: ${userType}`);
+
+    // ابحث عن المستخدم في قاعدة البيانات بناءً على ID
+    const document = await UserModel.findById(id).populate('suppliersList');
+    console.log(`User document found with ID: ${id}`);
+
+    if (!document) {
+      return res.status(404).json({ error: "No document found for this id." });
+    }
+
+    // ارجع بيانات المستخدم
+    console.log('Sending user data:', document);
+    res.status(200).json({ data: document });
+  } catch (error) {
+    console.error('Error during fetching user:', error);
+    return res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+});
+
+
 const getLoggedUserData = asyncHandler(async (req, res, next) => {
   req.params.id = req.user._id;
   req.query.userType = req.user.userType; // إضافة userType للطلب
@@ -156,5 +185,7 @@ module.exports = {
   register,
   getOne,
   getLoggedUserData,
-  updateUser
+  updateUser,
+  getOneWithSupplier
+
 };

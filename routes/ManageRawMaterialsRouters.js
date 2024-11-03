@@ -42,14 +42,14 @@ const router = express.Router();
 
 // created single route then previous one.it is easy to maintain
 //router.route('/get-materials').get(authService.verifyToken, authService.allowedTo('supplier'), getMaterials);
-router.route('/').get(authService.verifyToken, authService.allowedTo('supplier'), getMaterials);
+router.route('/').get(authService.verifyToken, authService.allowedTo('supplier','manufacturer'), getMaterials);
 
 router.route('/create-materials').post(authService.verifyToken, authService.allowedTo('supplier'), createMaterial);
 
-router.route('/:id').get(authService.verifyToken, authService.allowedTo('supplier'), getMaterialById);
-router.route('/update-material').post(authService.verifyToken, authService.allowedTo('supplier'), updateMaterial);
-router.route('/delete-material').post(authService.verifyToken, authService.allowedTo('supplier'), deleteRawMaterial);
-router.route("/image-uploads").post(authService.verifyToken, authService.allowedTo('supplier'), upload.single("image"), uploadImageOnCloudinary);
+router.route('/:id').get(authService.verifyToken, authService.allowedTo('supplier','manufacturer'), getMaterialById);
+router.route('/update-material').post(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), updateMaterial);
+router.route('/delete-material').post(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), deleteRawMaterial);
+router.route("/image-uploads").post(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), upload.single("image"), uploadImageOnCloudinary);
 
-router.route('/material/:query').get(authService.verifyToken, authService.allowedTo('supplier'), getMaterialByNameOrId);
+router.route('/material/:query').get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getMaterialByNameOrId);
 module.exports = router;

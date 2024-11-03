@@ -10,11 +10,14 @@ exports.getRawMaterialCurrentRequests = asyncHandler(async (req, res) => {
     // const page = req.query.page * 1 || 1;//To divide data into pages
     // const limit = req.query.limit * 1 || 5;//Number of data to appear on each page
     // const skip = (page - 1) * limit;//If I was on page  (2), I would skip the number of previous pages minus the page I am on multiplied by the number of data in it.
+    
+
     const userType = req.user.userType;
     const userId = req.user._id;
 
     // Filter requests based on userType
     const filter = userType === 'manufacturer' ? { manufacturerId: userId } : { supplierId: userId };
+
 
     const RawMaterialCurrentRequests = await RawMaterialCurrentRequestModel.find(filter);//.skip(skip).limit(limit)
     res.status(200).json({ data: RawMaterialCurrentRequests });//results: RawMaterialCurrentRequests.length, , page
@@ -230,4 +233,11 @@ exports.deleteRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     await RawMaterialCurrentRequestModel.findOneAndDelete({ shortId: id });
 
     res.status(204).send();
+});
+
+exports.getRawMaterialCurrentRequestsforManufacturer = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    console.log("reaches here")
+    const RawMaterialCurrentRequests = await RawMaterialCurrentRequestModel.find({ manufacturerId: id });
+    res.status(200).json({ data: RawMaterialCurrentRequests });
 });
