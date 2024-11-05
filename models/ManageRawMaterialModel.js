@@ -96,13 +96,11 @@ const ManageRawMaterialSchema = new mongoose.Schema({
     default: () => nanoid(),
     immutable: true, // اجعل القيمة غير قابلة للتعديل
   },
-
   supplierId: {
     type: mongoose.Schema.Types.ObjectId, // معرف المورد
     ref: 'Suppliers', // اسم الكولكشن المرتبطة
     required: false, //need to set it to false until Supplier collection is created . Otherwise, error
   },
-  
   materialOption: [{
     optionName: {
       type: String,

@@ -1,6 +1,9 @@
 const TransporterCurrentRequestModel = require('../models/transporterCurrentRequestModel');
 const asyncHandler = require('express-async-handler')
 
+// @desc Get list of Transporter Current Request for a transporter
+// @route GET /api/v1/transportCurrentRequest
+// @access Public
 exports.getTransporterCurrentRequest = asyncHandler(async (req, res) => {
 
     const userType = req.user.userType;
@@ -22,14 +25,15 @@ exports.getTransporterCurrentRequest = asyncHandler(async (req, res) => {
 
 });
 
+// @desc Create Transporter Current Request 
+// @route POST /api/v1/transportCurrentRequest
+// @access Public
 exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
 
-    const userId = req.user._id; // Get user ID
-    const userType = req.user.userType; // Get user type 
+    const userId = req.user._id; // senderId
+    const userType = req.user.userType; // sender_type
 
     const request_id = req.body.request_id;
-    // const senderId = req.body.senderId;
-    // const sender_type = req.body.sender_type;
     const receiver_id = req.body.receiver_id;
     const receiver_type = req.body.receiver_type;
     const transporterId = req.body.transporterId;
@@ -76,7 +80,108 @@ exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
     } catch (error) {
         console.error('Error creating transport request:', error);
         return res.status(400).json({ msg: 'Validation Error', errors: error.errors });
-        throw error;
     }
 
+});
+
+// @desc Get Specific Transporter Request by ID for authorized Transporter
+// @route GET /api/v1/transportCurrentRequest/:id
+// @access Public
+exports.getTransporterCurrentRequestById = asyncHandler(async (req, res) => {
+    const { id } = req.params; // take id from / :id
+    const userType = req.user.userType;
+    const userId = req.user._id;
+
+    // Check if ID is empty
+    if (!id || id.trim() === '') {
+        return res.status(400).json({ msg: 'ID is required.' });
+    }
+
+    // Check that the short ID matches the specified pattern.
+    const shortIdPattern = /^t[0-9a-z]{8}$/; // Regex for t followed by 8 characters (numbers or lowercase letters)
+
+    // Check that the ID is 9 characters long.
+    if (id.length !== 9 || !shortIdPattern.test(id)) {
+        return res.status(400).json({ msg: `Invalid shortId format: ${id}` });
+    }
+
+    // Search using shortId
+    const request = await TransporterCurrentRequestModel.findOne({ shortId: id });
+
+    // Check if the request is null or undefined
+    if (!request) {
+        return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
+    }
+
+    // Check if the user has access to this request
+    const hasAccess = userType === 'transporter' && request.transporterId.toString() === userId.toString();
+
+    if (!hasAccess) {
+        return res.status(401).json({ msg: 'You do not have permission to access this request.' });
+    }
+
+    res.status(200).json({ data: request });
+});
+
+// @desc Update Specific Transport Request Status by Transporter
+// @route PUT /api/v1/transportCurrentRequest/:id
+// @access Private
+exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
+    const { id } = req.params; 
+    const userId = req.user._id; // Get the user ID
+    const userType = req.user.userType; // Get user type (should be transporter)
+    const { status } = req.body; // Get the new status from request body
+
+    // Check if the user is a transporter
+    if (userType !== 'transporter') {
+        return res.status(403).json({ msg: 'Only transporters can update the request status.' });
+    }
+
+    // Find the transport request to check if it is assigned to the transporter
+    const request = await TransporterCurrentRequestModel.findOne({ shortId: id });
+
+    // Check if the request exists
+    if (!request) {
+        return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
+    }
+
+    // Verify that the transporter assigned to this request matches the current user
+    if (request.transporterId.toString() !== userId.toString()) {
+        return res.status(403).json({ msg: 'You do not have permission to access this request.' });
+    }
+
+    // Update the status of the request
+    const updatedRequest = await TransporterCurrentRequestModel.findOneAndUpdate(
+        { shortId: id }, // identifier to find the request
+        { status }, // the data to update
+        { new: true } // to return the updated data
+    );
+
+    // Send the updated request as response
+    res.status(200).json({ data: updatedRequest });
+});
+
+// @desc Delete Specific Transport Request by Transporter
+// @route DELETE /api/v1/transportCurrentRequest/:id
+// @access Private
+exports.deleteTransporterCurrentRequest = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id; // Get user ID
+    const userType = req.user.userType; // Get user type (transporter)
+
+    // Find the request to check if it is related to the user
+    const request = await TransporterCurrentRequestModel.findOne({ shortId: id });
+
+    //check if the request is null or undefined
+    if (!request) {
+        return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
+    }
+
+    if (userType === 'transporter' && request.transporterId.toString() !== userId.toString()) {
+        return res.status(403).json({ msg: 'Access denied: You do not have permission to delete this request.' });
+    }
+    //Delete request
+    await TransporterCurrentRequestModel.findOneAndDelete({ shortId: id });
+
+    res.status(204).send();
 });
