@@ -1,17 +1,14 @@
 const express = require('express');//import the express library
 const authService = require("../services/authService")
-const { addItemToBasket } = require('../services/shoppingBasketService');
+const { addItemToBasket, getShoppingBasketList, getShoppingBasketDetails, removeSpecificBasketItem } = require('../services/shoppingBasketService');
 const router = express.Router();
 
 router.route('/')
-    .post(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), addItemToBasket);
-// router.route('/:id')
-//     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestById)
-//     .put(authService.verifyToken, authService.allowedTo('supplier'), updateRawMaterialCurrentRequest)
-//     .delete(authService.verifyToken, authService.allowedTo('supplier'), deleteRawMaterialCurrentRequest); // Define a special path for ObjectId
-// router.route('/manufacturer/slug/:slug')
-//     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestByMSlug); // Path to search for manufacturer slug
-// router.route('/manufacturerName/:manufacturerName')
-//     .get(authService.verifyToken, authService.allowedTo('supplier'), getRawMaterialCurrentRequestByMName);
+    .post(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), addItemToBasket)
+    .get(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), getShoppingBasketList)
+router.route('/details')
+    .get(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), getShoppingBasketDetails);
+// router.route('/:itemId')
+//     .delete(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), removeSpecificBasketItem);
 
 module.exports = router;
