@@ -1,6 +1,7 @@
 const RawMaterialModel = require('../models/ManageRawMaterialModel');
 const slugify = require('slugify');
 const asyncHandler = require('express-async-handler')
+const Supplier = require('../models/suppliersModel')
 
 /* in each function i used try catch block. it is good for error handling because we can send different types of
 error like 400, 401. 404,500 etc. each error has particular meaning and it is good to handle in frontend. we can know looking at this status what kind of error it is. only in getMaterials and getMaterialById try block is not used. we can use it here too. i have also received data in three controllers below in body. body is considered more secure coz params are seen in address bar*/
@@ -81,11 +82,14 @@ exports.getMaterialByNameOrId = async (req, res) => {
 // @route PIST /api/v1/ManageRawMaterial
 // @accesss Privete
 exports.createMaterial = async (req, res) => {
+  const userId = req.user._id; // Retrieve user ID from token
+  const userType = req.user.userType; // Retrieve user type from token
+
   console.log('createMaterial', req.body);
-  
+
   // req.body.slug = slugify(req.body.name);
   // console.log('createMaterial',req.body);
-  
+
   // const material = await RawMaterialModel.create(req.body);
   // res.status(201).json({ data: material });
   try {
@@ -95,19 +99,26 @@ exports.createMaterial = async (req, res) => {
       quantity,
       description,
       storageInfo,
+      supplierId: userId,
       price,
       image,
       materialOption, // Add materialOption to the model
       units // Add units to the model
     });
 
+    // Update the user's addresses list with the new address ID
+    await Supplier.findByIdAndUpdate(
+      userId,
+      { $addToSet: { rawMaterialList: material._id } }, // استخدم $addToSet لتجنب التكرار
+      { new: true }
+    );
     await material.save();
     res.status(201).json({ success: true, message: 'Raw material added successfully', data: material });
+
   } catch (error) {
     console.error('Error adding material:', error);
     res.status(500).json({ message: 'Error adding material', error });
   }
-
 };
 
 // @desc    Update specific RawMaterial
@@ -115,33 +126,33 @@ exports.createMaterial = async (req, res) => {
 // @access  Private
 exports.updateMaterial = async (req, res) => {
   const { shortId } = req.body;
-  console.log('updateMaterial' ,req.body);
-  
-try {
-  const material = await RawMaterialModel.findOneAndUpdate(
-    { shortId }, req.body, { new: true }
-  );
+  console.log('updateMaterial', req.body);
 
-  if (!material) {
-    res.status(404).json({ msg: `No Material for this id ${shortId}` });
+  try {
+    const material = await RawMaterialModel.findOneAndUpdate(
+      { shortId }, req.body, { new: true }
+    );
+
+    if (!material) {
+      res.status(404).json({ msg: `No Material for this id ${shortId}` });
+    }
+    res.status(200).json({ success: true, data: material });
+
+  } catch (error) {
+    console.error('Error updating material:', error);
+    res.status(500).json({ message: 'Error adding material', error });
   }
-  res.status(200).json({success: true, data: material });
-  
-} catch (error) {
-  console.error('Error updating material:', error);
-  res.status(500).json({ message: 'Error adding material', error });
-}
 };
 
 // @desc    Delete specific RawMaterial
 // @route   DELETE /api/v1/ManageRawMaterial/:id
 // @access  Private
 exports.deleteRawMaterial = async (req, res) => {
-  console.log('deleteRawMaterialbody' ,req.body);
+  console.log('deleteRawMaterialbody', req.body);
   const shortId = req.body.data.shortId;
-  
-  console.log('deleteRawMaterial' ,req.body.data.shortId);
-  
+
+  console.log('deleteRawMaterial', req.body.data.shortId);
+
 
   try {
     // Ensure you're querying by the correct field. Assuming shortId is the field name in your DB:
