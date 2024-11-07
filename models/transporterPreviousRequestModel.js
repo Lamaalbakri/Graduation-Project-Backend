@@ -69,7 +69,10 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
         },
         actual_delivery_date: {
             type: Date,
-            required: true,
+            default: null,
+            required: function() {
+                return this.status === 'delivered';
+            }
         },
         status: {
             type: String,

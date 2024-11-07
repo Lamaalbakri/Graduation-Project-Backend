@@ -45,6 +45,7 @@ exports.createTransporterPreviousRequest = asyncHandler(async (req, res) => {
         distance,
         totalPrice,
         estimated_delivery_date,
+        actual_delivery_date,
         status,
         arrivalAddress,
         departureAddress,
@@ -80,6 +81,9 @@ exports.createTransporterPreviousRequest = asyncHandler(async (req, res) => {
     // If the _id exists, we add it to the transmitted data.
     if (_id) {
         TransporterPreviousRequestData._id = _id;
+    }
+    if (status === 'delivered') {
+        TransporterPreviousRequestData.actual_delivery_date = actual_delivery_date || Date.now();
     }
 
     const TransportPreviousRequest = await TransporterPreviousRequestModel.create(TransporterPreviousRequestData);
@@ -132,7 +136,11 @@ exports.updateTransporterPreviousRequest = asyncHandler(async (req, res) => {
     const { id } = req.params; 
     const userId = req.user._id; // Get the user ID
     const userType = req.user.userType; // Get user type (should be transporter)
-    const { status } = req.body; // Get the new status from request body
+    const { status, actual_delivery_date } = req.body; // Get the new status from request body
+
+    const updateData = {
+        ...req.body,
+    };
 
     // Check if the user is a transporter
     if (userType !== 'transporter') {
@@ -152,10 +160,16 @@ exports.updateTransporterPreviousRequest = asyncHandler(async (req, res) => {
         return res.status(403).json({ msg: 'You do not have permission to access this request.' });
     }
 
+    // if the status changes to delivered, select actual_delivery_date
+    if (status === 'delivered' && !actual_delivery_date) {
+        updateData.actual_delivery_date = Date.now();
+    }
+
     // Update the status of the request
     const updatedRequest = await TransporterPreviousRequestModel.findOneAndUpdate(
         { shortId: id }, // identifier to find the request
         { status }, // the data to update
+        { updateData },
         { new: true } // to return the updated data
     );
 
