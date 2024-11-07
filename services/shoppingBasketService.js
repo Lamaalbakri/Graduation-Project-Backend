@@ -109,8 +109,8 @@ exports.addItemToBasket = asyncHandler(async (req, res, next) => {
                 options
             }],
             subtotal_items: quantityNumber * unitPrice,
-            shipping_cost,
-            total_price: quantityNumber * unitPrice + shipping_cost,
+            shipping_cost: 0,//temporary until it counted in next step
+            total_price: 0,//temporary until it counted in next step
         });
 
     } else {
@@ -118,7 +118,6 @@ exports.addItemToBasket = asyncHandler(async (req, res, next) => {
         const itemIndex = basket.ShoppingBasketItems.findIndex(
             (i) => i.item_id.toString() === item_id.toString() &&
                 optionsAreEqual(i.options, options));
-        console.log(itemIndex);
 
 
         if (itemIndex > -1) {
@@ -155,15 +154,16 @@ exports.addItemToBasket = asyncHandler(async (req, res, next) => {
 });
 
 // @desc Get ShoppingBasket Details
-// @route GET /api/v1/ShoppingBasket/details
+// @route POST /api/v1/ShoppingBasket/details
 // @access Private/user
 exports.getShoppingBasketDetails = asyncHandler(async (req, res, next) => {
+
     const userType = req.user.userType;
     const buyerId = req.user._id;
-    const { sellerName, sellerId } = req.body;
+    const { basketId } = req.body;
 
     //1)Get Basket for logged user
-    let basket = await ShoppingBasketModel.findOne({ buyerId, sellerId });
+    let basket = await ShoppingBasketModel.findOne({ _id: basketId });
 
     if (!basket) {
         return res.status(404).json({ message: "Basket not found for this user" });
@@ -194,31 +194,104 @@ exports.getShoppingBasketList = asyncHandler(async (req, res, next) => {
     res.status(200).json({ numberOfBasketItems: totalItems, data: baskets });
 });
 
-// @desc Get Remove Item from basket
+// @desc Remove Item from basket
 // @route Delete /api/v1/ShoppingBasket/:itemId
 // @access Private/user
-// exports.removeSpecificBasketItem = asyncHandler(async (req, res, next) => {
-//     const userType = req.user.userType;
-//     const buyerId = req.user._id;
+//This item will be removed the item with its quantity from the basket 
+exports.removeSpecificBasketItem = asyncHandler(async (req, res, next) => {
+    const userType = req.user.userType;
+    const buyerId = req.user._id;
+    const { itemId, basketId } = req.body;
 
-//     let basket = await ShoppingBasketModel.findOneAndUpdate(
-//         { user: buyerId },
-//         {
-//             $pull: { ShoppingBasketItems: { _id: req.params.itemId } }
-//         }, {
-//         new: true
-//     }
-//     );
+    // Validate itemId as a valid ObjectId
+    // const itemId = req.params.itemId;
+    if (!mongoose.Types.ObjectId.isValid(itemId)) {
+        return res.status(400).json({ message: "Invalid item ID format" });
+    }
 
-//     // Calculate final values ​​using the outer function
-//     const { subtotal_items, shipping_cost, total_price } = calculateBasketTotals(basket, 10);
+    let basket = await ShoppingBasketModel.findOneAndUpdate(
+        { _id: basketId },
+        {
+            $pull: { ShoppingBasketItems: { _id: itemId } }
+        }, {
+        new: true
+    }
+    );
 
-//     basket.subtotal_items = subtotal_items;
-//     basket.shipping_cost = shipping_cost;
-//     basket.total_price = total_price;
+    // Calculate final values ​​using the outer function
+    const { subtotal_items, shipping_cost, total_price } = calculateBasketTotals(basket);
 
-//     await basket.save();
-//     const totalItems = calculateBasketItemCount(basket);
+    basket.subtotal_items = subtotal_items;
+    basket.shipping_cost = shipping_cost;
+    basket.total_price = total_price;
 
-//     res.status(200).json({ numberOfBasketItems: totalItems, data: basket });
-// });
+
+    const totalItems = calculateBasketItemCount(basket);
+    await basket.save();
+
+    res.status(200).json({ numberOfBasketItems: totalItems, data: basket });
+});
+
+// @desc  Item quantity from the basket
+// @route PUT /api/v1/ShoppingBasket/itemId
+// @access Private/user
+exports.updateBasketItemQuantity = asyncHandler(async (req, res, next) => {
+    const userType = req.user.userType;
+    const buyerId = req.user._id;
+    const { basketId, quantity, itemId } = req.body;
+
+    let basket = await ShoppingBasketModel.findOne({ _id: basketId });
+    if (!basket) {
+        return res.status(404).json({ message: "Basket not found" });
+    }
+
+    //if item is exist in basket ,then update quantity
+    const itemIndex = basket.ShoppingBasketItems.findIndex(
+        (i) => i._id.toString() === itemId);
+
+    if (itemIndex > -1) {
+        const basketItem = basket.ShoppingBasketItems[itemIndex];
+        // basket.ShoppingBasketItems[itemExistIndex].quantity += quantityNumber;
+        basketItem.quantity = quantity;
+        basket.ShoppingBasketItems[itemIndex] = basketItem;
+    } else {
+        //item not exist,  puch it to basket
+        return res.status(404).json({ message: "item not exist" });
+    }
+    // Calculate final values ​​using the outer function
+    const { subtotal_items, shipping_cost, total_price } = calculateBasketTotals(basket, 10);
+
+    basket.subtotal_items = subtotal_items;
+    basket.shipping_cost = shipping_cost;
+    basket.total_price = total_price;
+
+    await basket.save();
+
+    const totalItems = calculateBasketItemCount(basket);
+
+    res.status(200).json({ numberOfBasketItems: totalItems, message: "Item quantity updated successfully", data: basket });
+
+});
+
+// @desc Clear user basket from DB
+// @route Delete /api/v1/ShoppingBasket/
+// @access Private/user
+exports.clearBasket = asyncHandler(async (req, res, next) => {
+    const userType = req.user.userType;
+    const buyerId = req.user._id;
+    const { basketId } = req.body;
+
+    let basket = await ShoppingBasketModel.findOneAndDelete({ _id: basketId });
+
+    if (!basket) {
+        return res.status(404).json({ error: "Basket not found" });
+    }
+
+    // استرجاع عدد العناصر المتبقية في سلال التسوق الخاصة بالمستخدم
+    const remainingBaskets = await ShoppingBasketModel.countDocuments({ buyerId });
+
+    res.status(200).json({
+        message: "Basket deleted successfully",
+        numberOfBasketItems: remainingBaskets
+    });
+});

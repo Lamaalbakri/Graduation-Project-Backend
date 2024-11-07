@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getMaterials,
+  getMaterialForListOfSupplier,
   getMaterialById,
   createMaterial,
   updateMaterial,
@@ -16,7 +17,15 @@ const router = express.Router();
 router.route('/get-materials')
   .get(
     authService.verifyToken,
+    authService.allowedTo('manufacturer', 'supplier'),
     getMaterials
+  );
+
+router.route('/get-specific-material-list')
+  .get(
+    authService.verifyToken,
+    authService.allowedTo('manufacturer'),
+    getMaterialForListOfSupplier
   );
 
 router.route('/create-materials')
