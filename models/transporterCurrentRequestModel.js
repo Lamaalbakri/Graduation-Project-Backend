@@ -74,7 +74,7 @@ const TransporterCurrentRequestSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['pending', 'inProgress', 'delivered', 'rejected'],
+            enum: ['pending', 'accepted', 'delivered', 'rejected'],
             default: 'pending',
         },
         arrivalAddress: {  // Arrival address (e.g. manufacturer, distributor, or retailer)
