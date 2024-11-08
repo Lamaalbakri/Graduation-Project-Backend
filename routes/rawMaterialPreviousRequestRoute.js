@@ -27,7 +27,7 @@ router.route('/manufacturer/slug/:slug')
 router.route('/manufacturerName/:manufacturerName')
     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialPreviousRequestByMName);
 
-router.route('/manufacturer/:id')
+router.route('/manufacturer/order')
     .get(authService.verifyToken, getRawMaterialPreviousRequestsforManufacturer)
 
 

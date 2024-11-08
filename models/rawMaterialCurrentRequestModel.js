@@ -49,6 +49,10 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
                 required: true,
                 min: 1,
             },
+            image: {///!!!
+                type: String, // if using GridFS for image storage change this to an ObjectID  
+                // required: [true, "Product Image is required"],
+            },
             unit_price: {
                 type: Number,
                 required: true,
@@ -77,6 +81,17 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
                 }
             ],
         }],
+        subtotal_items: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+        // تكلفة الشحن
+        shipping_cost: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
         total_price: {
             type: Number,
             required: true,

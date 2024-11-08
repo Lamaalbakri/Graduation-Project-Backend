@@ -10,7 +10,7 @@ exports.getRawMaterialCurrentRequests = asyncHandler(async (req, res) => {
     // const page = req.query.page * 1 || 1;//To divide data into pages
     // const limit = req.query.limit * 1 || 5;//Number of data to appear on each page
     // const skip = (page - 1) * limit;//If I was on page  (2), I would skip the number of previous pages minus the page I am on multiplied by the number of data in it.
-    
+
 
     const userType = req.user.userType;
     const userId = req.user._id;
@@ -129,6 +129,8 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     //const manufacturerId= req.body.manufacturerId;
     const manufacturerName = req.body.manufacturerName;
     const supplyingRawMaterials = req.body.supplyingRawMaterials;
+    const subtotal_items = req.body.subtotal_items;
+    const shipping_cost = req.body.shipping_cost;
     const total_price = req.body.total_price;
     const payment_method = req.body.payment_method;
     const status = req.body.status || 'pending';
@@ -136,7 +138,7 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const departureAddress = req.body.departureAddress || null;
     const transporterId = req.body.transporterId || null;
     const transporterName = req.body.transporterName || '';
-    const estimated_delivery_date = req.body.estimated_delivery_date;
+    const estimated_delivery_date = req.body.estimated_delivery_date || null;
     const actual_delivery_date = req.body.actual_delivery_date || null;
     const notes = req.body.notes || '';
     const tracking_number = req.body.tracking_number || '';
@@ -155,6 +157,8 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
         manufacturerId: userId,
         manufacturerName,
         supplyingRawMaterials,
+        subtotal_items,
+        shipping_cost,
         total_price,
         payment_method,
         status,
@@ -196,6 +200,11 @@ exports.updateRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
         return res.status(403).json({ msg: 'You do not have permission to access this request.' });
     }
+    // const accessibleRequests = requests.filter((request) =>
+    //     (userType === 'supplier' && request.supplierId.toString() === userId.toString()) ||
+    //     (userType === 'manufacturer' && request.manufacturerId.toString() === userId.toString())
+    // );
+
 
     const updatedRequest = await RawMaterialCurrentRequestModel.findOneAndUpdate(
         { shortId: id },//identifier to find the request 
@@ -203,10 +212,6 @@ exports.updateRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
         { new: true }//to return data after ubdate
     );
 
-    //check if the request is null or undefined
-    if (!request) {
-        return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
-    }
     res.status(200).json({ data: updatedRequest });
 });
 
@@ -236,8 +241,8 @@ exports.deleteRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
 });
 
 exports.getRawMaterialCurrentRequestsforManufacturer = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    console.log("reaches here")
-    const RawMaterialCurrentRequests = await RawMaterialCurrentRequestModel.find({ manufacturerId: id });
+    const userId = req.user._id; // Get user ID
+    const userType = req.user.userType;
+    const RawMaterialCurrentRequests = await RawMaterialCurrentRequestModel.find({ manufacturerId: userId });
     res.status(200).json({ data: RawMaterialCurrentRequests });
 });

@@ -129,6 +129,8 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
         manufacturerName,
         manufacturerId,
         supplyingRawMaterials,
+        subtotal_items,
+        shipping_cost,
         total_price,
         payment_method,
         status,
@@ -151,6 +153,8 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
         manufacturerName,
         manufacturerId,
         supplyingRawMaterials,
+        subtotal_items,
+        shipping_cost,
         total_price,
         payment_method,
         status,
@@ -243,7 +247,8 @@ exports.deleteRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
 });
 
 exports.getRawMaterialPreviousRequestsforManufacturer = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const RawMaterialCurrentRequests = await RawMaterialPreviousRequestModel.find({ manufacturerId: id });
+    const userId = req.user._id; // Get user ID
+    const userType = req.user.userType;
+    const RawMaterialCurrentRequests = await RawMaterialPreviousRequestModel.find({ manufacturerId: userId });
     res.status(200).json({ data: RawMaterialCurrentRequests });
 });

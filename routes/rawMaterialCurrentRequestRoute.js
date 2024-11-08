@@ -19,14 +19,14 @@ router.route('/')
     .post(authService.verifyToken, authService.allowedTo('manufacturer'), createRawMaterialCurrentRequest);
 router.route('/:id')
     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestById)
-    .put(authService.verifyToken, authService.allowedTo('supplier'), updateRawMaterialCurrentRequest)
+    .put(authService.verifyToken, authService.allowedTo('supplier', 'transporter'), updateRawMaterialCurrentRequest)
     .delete(authService.verifyToken, authService.allowedTo('supplier'), deleteRawMaterialCurrentRequest); // Define a special path for ObjectId
 router.route('/manufacturer/slug/:slug')
     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestByMSlug); // Path to search for manufacturer slug
 router.route('/manufacturerName/:manufacturerName')
     .get(authService.verifyToken, authService.allowedTo('supplier'), getRawMaterialCurrentRequestByMName);
 
-    //give all curren request to the spicefic manufacturer id 
-router.route('/manufacturer/:id')
+//give all curren request to the spicefic manufacturer id 
+router.route('/manufacturer/order')
     .get(authService.verifyToken, authService.allowedTo('supplier', 'manufacturer'), getRawMaterialCurrentRequestsforManufacturer)
 module.exports = router;
