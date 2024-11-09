@@ -167,7 +167,6 @@ exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
             return res.status(400).json({ msg: 'Invalid status for update.' });
     }
 
-
     // Call the function to update the status of the sender and check if successful
     const isSenderUpdated = await updateSenderStatus(request, relatedStatus);
 
@@ -175,10 +174,16 @@ exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
         return res.status(500).json({ msg: 'Failed to update sender status.' });
     }
 
+    const updateStatus = { status };
+    // if the status is 'delivered' and actual date is not set, add the current date
+    if (status === 'delivered' && !request.actual_delivery_date) {
+        updateStatus.actual_delivery_date = new Date();
+    }
+
     // Update the status of the transport request
     const updatedRequest = await TransporterCurrentRequestModel.findOneAndUpdate(
         { shortId: id }, // identifier to find the request
-        { status }, // the data to update
+        updateStatus, // the data to update
         { new: true } // to return the updated data
     );
     // Send the updated request as response
@@ -189,27 +194,24 @@ exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
 async function updateSenderStatus(request, status) {
 
     let model;
-    // تحديد نوع الجهة المرسلة بناءً على الحقول في الطلب
     switch (request.sender_type) {
         case 'supplier':
             model = RawMaterialCurrentRequestModel;
             break;
         case 'manufacturer':
-            model = ManufacturerGoodRequestModel; // تأكد من تحديد النموذج المناسب
+            //model = ManufacturerGoodRequestModel;
             break;
         case 'distributor':
-            model = DistributorRequestModel; // تأكد من تحديد النموذج المناسب
+            //model = DistributorGoodRequestModel;
             break;
         default:
             throw new Error('Unknown sender type.');
     }
 
-    // تحديث حالة الطلب بناءً على نوع الجهة المرسلة
     let result;
     if (status === 'inProgress') {
-        // إذا كانت الحالة "مقبولة"، نحدث الحقول الأخرى مثل العنوان والمعلومات المتعلقة بالنقل
         result = await model.updateMany(
-            { shortId: request.request_id },  // تحديث الطلب بناءً على ID الطلب
+            { shortId: request.request_id },
             {
                 status: status,
                 departureAddress: request.departureAddress,
@@ -219,15 +221,21 @@ async function updateSenderStatus(request, status) {
                 transportRequest_id: request.shortId,
             }
         );
-    } else if (status === 'pending' || status === 'delivered') {
-        // إذا كانت الحالة "مرفوضة" أو "تم التوصيل"، نحدث فقط حالة الطلب
+    } else if (status === 'pending') {
         result = await model.updateMany(
-            { shortId: request.request_id },  // تحديث الطلب بناءً على ID الطلب
-            { status: status }     // تحديث الحالة فقط
+            { shortId: request.request_id },
+            { status: status }
+        );
+    } else if (status === 'delivered') {
+        result = await model.updateMany(
+            { shortId: request.request_id },
+            { 
+                status: status,
+                actual_delivery_date: request.actual_delivery_date || new Date()
+            }
         );
     }
 
-    // تحقق من نتيجة التحديث
     if (!result || result.modifiedCount === undefined || result.modifiedCount === 0) {
         throw new Error('Failed to update status in sender model');
     }
@@ -235,8 +243,6 @@ async function updateSenderStatus(request, status) {
     // Return true if the update was successful, otherwise false
     return result.modifiedCount > 0;
 }
-
-
 
 // @desc Delete Specific Transport Request by Transporter
 // @route DELETE /api/v1/transportCurrentRequest/:id

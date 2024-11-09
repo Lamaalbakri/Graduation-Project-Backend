@@ -67,6 +67,7 @@ exports.createTransporterPreviousRequest = asyncHandler(async (req, res) => {
         distance,
         totalPrice,
         estimated_delivery_date,
+        actual_delivery_date,
         status,
         arrivalAddress,
         departureAddress,
@@ -81,9 +82,6 @@ exports.createTransporterPreviousRequest = asyncHandler(async (req, res) => {
     // If the _id exists, we add it to the transmitted data.
     if (_id) {
         TransporterPreviousRequestData._id = _id;
-    }
-    if (status === 'delivered') {
-        TransporterPreviousRequestData.actual_delivery_date = actual_delivery_date || Date.now();
     }
 
     const TransportPreviousRequest = await TransporterPreviousRequestModel.create(TransporterPreviousRequestData);
