@@ -173,7 +173,7 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
             lowercase: true,
         },
         estimated_delivery_date: {
-            type: Date,
+            type: [Date],
         },
         actual_delivery_date: {
             type: Date,

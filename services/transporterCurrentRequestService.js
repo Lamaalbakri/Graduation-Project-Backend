@@ -189,32 +189,54 @@ exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
 async function updateSenderStatus(request, status) {
 
     let model;
-    // let senderType;
     // تحديد نوع الجهة المرسلة بناءً على الحقول في الطلب
     switch (request.sender_type) {
         case 'supplier':
             model = RawMaterialCurrentRequestModel;
             break;
         case 'manufacturer':
-            //model =;
+            model = ManufacturerGoodRequestModel; // تأكد من تحديد النموذج المناسب
             break;
         case 'distributor':
-            //model =;
+            model = DistributorRequestModel; // تأكد من تحديد النموذج المناسب
             break;
         default:
             throw new Error('Unknown sender type.');
     }
-    // تحديث حالة الطلب بناءً على نوع الجهة المرسلة
 
-    const result = await model.updateMany(
-        //shortId : request.request_id
-        { shortId: request.request_id },  // Update the correct request based on the sender type
-        { status: status }     // Update the status in the sender model
-    );
+    // تحديث حالة الطلب بناءً على نوع الجهة المرسلة
+    let result;
+    if (status === 'inProgress') {
+        // إذا كانت الحالة "مقبولة"، نحدث الحقول الأخرى مثل العنوان والمعلومات المتعلقة بالنقل
+        result = await model.updateMany(
+            { shortId: request.request_id },  // تحديث الطلب بناءً على ID الطلب
+            {
+                status: status,
+                departureAddress: request.departureAddress,
+                transporterId: request.transporterId,
+                transporterName: request.transporterName,
+                estimated_delivery_date: request.estimated_delivery_date,
+                transportRequest_id: request.shortId,
+            }
+        );
+    } else if (status === 'pending' || status === 'delivered') {
+        // إذا كانت الحالة "مرفوضة" أو "تم التوصيل"، نحدث فقط حالة الطلب
+        result = await model.updateMany(
+            { shortId: request.request_id },  // تحديث الطلب بناءً على ID الطلب
+            { status: status }     // تحديث الحالة فقط
+        );
+    }
+
+    // تحقق من نتيجة التحديث
+    if (!result || result.modifiedCount === undefined || result.modifiedCount === 0) {
+        throw new Error('Failed to update status in sender model');
+    }
 
     // Return true if the update was successful, otherwise false
     return result.modifiedCount > 0;
 }
+
+
 
 // @desc Delete Specific Transport Request by Transporter
 // @route DELETE /api/v1/transportCurrentRequest/:id
