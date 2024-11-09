@@ -31,6 +31,11 @@ exports.getAddressByUserId = asyncHandler(async (req, res) => {
 // @desc Create a new address for the authenticated user
 // @route POST /api/v1/addresses
 // @access Private
+/**
+ * This method will change when the project is expanded 
+ * and will allow the creation of more than one address for each user. 
+ * Based on this, the interfaces will allow the user to choose between several addresses.
+ */
 exports.createAddress = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Retrieve user ID from token
     const userType = req.user.userType; // Retrieve user type from token
@@ -38,6 +43,14 @@ exports.createAddress = asyncHandler(async (req, res) => {
 
     // Find the appropriate model based on user type
     const UserModel = getModelByUserType(userType);
+
+    // Check if the user already has an address
+    const existingAddress = await AddressModel.findOne({ user_id: userId });
+
+    if (existingAddress) {
+        // If an address already exists, return a message indicating that a new address cannot be created
+        return res.status(400).json({ msg: 'You already have an address. You cannot create another one.' });
+    }
 
     // Create a new address and link it to the authenticated user
     const newAddress = await AddressModel.create({

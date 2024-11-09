@@ -2,6 +2,7 @@ const slugify = require('slugify');
 const asyncHandler = require('express-async-handler')
 const RawMaterialCurrentRequestModel = require('../models/rawMaterialCurrentRequestModel');
 const mongoose = require('mongoose');
+const ManageRawMaterialModel = require('../models/ManageRawMaterialModel');
 
 // @desc Get list of Raw Material Request for a specific Supplier or Manufacturer
 // @route GET /api/v1/rawMaterialCurrentRequest
@@ -124,6 +125,10 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Get user ID
     const userType = req.user.userType; // Get user type (supplier or manufacturer)
 
+    if (userType !== 'manufacturer') {
+        return res.status(403).json({ msg: 'Access denied: Only manufacturers can create raw material requests.' });
+    }
+
     const supplierId = req.body.supplierId;
     const supplierName = req.body.supplierName;
     //const manufacturerId= req.body.manufacturerId;
@@ -145,9 +150,37 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const transportRequest_id = req.body.transportRequest_id || '';
     const contract_id = req.body.contract_id || ''
 
+    // التحقق من الكمية المتوفرة قبل متابعة إنشاء الطلب
+    const insufficientItems = [];
+    for (let i = 0; i < supplyingRawMaterials.length; i++) {
+        const item = supplyingRawMaterials[i];
+        const rawMaterial = await ManageRawMaterialModel.findOne({ _id: item.rawMaterial_id, supplierId: supplierId });
+        console.log(rawMaterial)
+        if (!rawMaterial || rawMaterial.quantity < item.quantity) {
+            // إذا كانت الكمية المطلوبة أكبر من المتوفرة
+            insufficientItems.push({
+                rawMaterialName: item.rawMaterial_name,
+                requestedQuantity: item.quantity,
+                availableQuantity: rawMaterial ? rawMaterial.quantity : 0
+            });
+        }
+    }
 
-    if (userType !== 'manufacturer') {
-        return res.status(403).json({ msg: 'Access denied: Only manufacturers can create raw material requests.' });
+    if (insufficientItems.length > 0) {
+        return res.status(400).json({ error: 'Some items are unavailable or have insufficient stock.', insufficientItems });
+    }
+
+    // تقليص الكمية من ManageRawMaterial بعد التحقق من الكميات
+    for (let i = 0; i < supplyingRawMaterials.length; i++) {
+        const item = supplyingRawMaterials[i];
+        const rawMaterial = await ManageRawMaterialModel.findOne({ _id: item.item_id, supplierId: supplierId });
+
+        if (rawMaterial && rawMaterial.quantity >= item.quantity) {
+            // تقليص الكمية المتوفرة
+            await ManageRawMaterialModel.findByIdAndUpdate(item.item_id, {
+                $inc: { quantity: -item.quantity }
+            });
+        }
     }
 
     //Async Await Syntax 
