@@ -128,7 +128,7 @@ exports.getTransporterCurrentRequestById = asyncHandler(async (req, res) => {
 // @route PUT /api/v1/transportCurrentRequest/:id
 // @access Private
 exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
-    const { id } = req.params; 
+    const { id } = req.params;
     const userId = req.user._id; // Get the user ID
     const userType = req.user.userType; // Get user type (should be transporter)
     const { status } = req.body; // Get the new status from request body
@@ -167,16 +167,20 @@ exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
             return res.status(400).json({ msg: 'Invalid status for update.' });
     }
 
-    // Update the status of the request
+
+    // Call the function to update the status of the sender and check if successful
+    const isSenderUpdated = await updateSenderStatus(request, relatedStatus);
+
+    if (!isSenderUpdated) {
+        return res.status(500).json({ msg: 'Failed to update sender status.' });
+    }
+
+    // Update the status of the transport request
     const updatedRequest = await TransporterCurrentRequestModel.findOneAndUpdate(
         { shortId: id }, // identifier to find the request
         { status }, // the data to update
         { new: true } // to return the updated data
     );
-
-    // Call the function to update the status of the sender
-    await updateSenderStatus(request, relatedStatus);
-
     // Send the updated request as response
     res.status(200).json({ data: updatedRequest });
 });
@@ -185,26 +189,31 @@ exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
 async function updateSenderStatus(request, status) {
 
     let model;
-    let senderType;
+    // let senderType;
     // تحديد نوع الجهة المرسلة بناءً على الحقول في الطلب
-    if (request.supplierId) {
-        senderType = 'supplier';
-        model = RawMaterialCurrentRequestModel;
-    } else if (request.manufacturerId) {
-        senderType = 'manufacturer';
-        //model = ; 
-    } else if (request.distributorId) {
-        senderType = 'distributor';
-        //model = ; //
-    } else {
-        throw new Error('Unknown sender type.');
+    switch (request.sender_type) {
+        case 'supplier':
+            model = RawMaterialCurrentRequestModel;
+            break;
+        case 'manufacturer':
+            //model =;
+            break;
+        case 'distributor':
+            //model =;
+            break;
+        default:
+            throw new Error('Unknown sender type.');
     }
-
     // تحديث حالة الطلب بناءً على نوع الجهة المرسلة
-    await model.updateMany(
-        { _id: request._id },  // Update the correct request based on the sender type
+
+    const result = await model.updateMany(
+        //shortId : request.request_id
+        { shortId: request.request_id },  // Update the correct request based on the sender type
         { status: status }     // Update the status in the sender model
     );
+
+    // Return true if the update was successful, otherwise false
+    return result.modifiedCount > 0;
 }
 
 // @desc Delete Specific Transport Request by Transporter
