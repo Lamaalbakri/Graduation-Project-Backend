@@ -118,9 +118,9 @@ exports.getRawMaterialPreviousRequestByMName = asyncHandler(async (req, res) => 
 // @route POST /api/v1/rawMaterialPreviousRequest
 // @access Public
 exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
-    const userId = req.user._id; // Get user ID
-    const userType = req.user.userType; // Get user type (supplier or manufacturer)
-
+    // const userId = req.user._id; // Get user ID
+    // const userType = req.user.userType; // Get user type (supplier or manufacturer)
+    console.log('try to create previous here')
     const {
         _id,
         shortId,
@@ -146,8 +146,17 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
         contract_id,
     } = req.body;
 
+
+    if (!shortId || !_id) {
+        console.log('here the error')
+        return res.status(400).json({ error: "shortId and _id are  Missing" });
+    }
+
+
     //Async Await Syntax 
     const rawMaterialRequestData = {
+        _id,
+        shortId,
         supplierId,
         supplierName,
         manufacturerName,
@@ -168,19 +177,19 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
         tracking_number,
         transportRequest_id,
         contract_id,
-        slug: slugify(manufacturerName),
     };
 
-    // If the shortId exists, we add it to the transmitted data.
-    if (shortId) {
-        rawMaterialRequestData.shortId = shortId;
-    }
-    // If the _id exists, we add it to the transmitted data.
-    if (_id) {
-        rawMaterialRequestData._id = _id;
-    }
+    // // If the shortId exists, we add it to the transmitted data.
+    // if (shortId) {
+    //     rawMaterialRequestData.shortId = shortId;
+    // }
+    // // If the _id exists, we add it to the transmitted data.
+    // if (_id) {
+    //     rawMaterialRequestData._id = _id;
+    // }
 
     const RawMaterialPreviousRequest = await RawMaterialPreviousRequestModel.create(rawMaterialRequestData);
+    console.log('done here previous serves')
     res.status(201).json({ data: RawMaterialPreviousRequest });
 });
 

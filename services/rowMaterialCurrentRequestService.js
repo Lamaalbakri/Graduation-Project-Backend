@@ -220,10 +220,10 @@ exports.updateRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Get user ID
     const userType = req.user.userType; // Get user type (supplier or manufacturer)
     const { status } = req.body;
-
+    console.log("Sending request to update status:", status, id);
     // Find the request to check if it is related to the user
     const request = await RawMaterialCurrentRequestModel.findOne({ shortId: id });
-
+    console.log(request)
     // Check if the request exists
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
@@ -264,9 +264,9 @@ exports.deleteRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
     }
 
-    if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
-        return res.status(403).json({ msg: 'Access denied: You do not have permission to delete this request.' });
-    }
+    // if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
+    //     return res.status(403).json({ msg: 'Access denied: You do not have permission to delete this request.' });
+    // }
     //Delete request
     await RawMaterialCurrentRequestModel.findOneAndDelete({ shortId: id });
 

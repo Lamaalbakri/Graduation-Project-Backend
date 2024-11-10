@@ -1,5 +1,9 @@
 const TransporterCurrentRequestModel = require('../models/transporterCurrentRequestModel');
 const RawMaterialCurrentRequestModel = require('../models/rawMaterialCurrentRequestModel');
+const RawMaterialPreviousRequestModel = require('../models/rawMaterialPreviousRequestModel');
+const { createRawMaterialPreviousRequest } = require('./rowMaterialPreviousRequestService');
+const { deleteRawMaterialCurrentRequest } = require('./rowMaterialCurrentRequestService');
+
 const asyncHandler = require('express-async-handler')
 
 // @desc Get list of Transporter Current Request for a transporter
@@ -193,24 +197,28 @@ exports.updateTransporterCurrentRequest = asyncHandler(async (req, res) => {
 // Function to update the status of the sender (supplier, manufacturer, distributor)
 async function updateSenderStatus(request, status) {
 
-    let model;
+    let currentModel;
+    let methodCreate;
     switch (request.sender_type) {
         case 'supplier':
-            model = RawMaterialCurrentRequestModel;
+            currentModel = RawMaterialCurrentRequestModel;
+            methodCreate = createRawMaterialPreviousRequest;
             break;
         case 'manufacturer':
-            //model = ManufacturerGoodRequestModel;
+            //currentModel = ManufacturerGoodRequestModel;
             break;
         case 'distributor':
-            //model = DistributorGoodRequestModel;
+            //currentModel = DistributorGoodRequestModel;
             break;
         default:
             throw new Error('Unknown sender type.');
     }
 
+
+
     let result;
     if (status === 'inProgress') {
-        result = await model.updateMany(
+        result = await currentModel.updateMany(
             { shortId: request.request_id },
             {
                 status: status,
@@ -222,26 +230,35 @@ async function updateSenderStatus(request, status) {
             }
         );
     } else if (status === 'pending') {
-        result = await model.updateMany(
+        result = await currentModel.updateMany(
             { shortId: request.request_id },
             { status: status }
         );
     } else if (status === 'delivered') {
-        result = await model.updateMany(
+        //1) update statuse
+        result = await currentModel.findOneAndUpdate(
             { shortId: request.request_id },
-            { 
+            {
                 status: status,
                 actual_delivery_date: request.actual_delivery_date || new Date()
-            }
+            },
+            { new: true }
         );
+
+        //2) create previous request to delete current request
+
+        // Call the function to create the previous request
+
+        //3)delete current request
+
     }
 
-    if (!result || result.modifiedCount === undefined || result.modifiedCount === 0) {
+    if (!result) {
         throw new Error('Failed to update status in sender model');
     }
 
     // Return true if the update was successful, otherwise false
-    return result.modifiedCount > 0;
+    return !!result;
 }
 
 // @desc Delete Specific Transport Request by Transporter
@@ -268,3 +285,38 @@ exports.deleteTransporterCurrentRequest = asyncHandler(async (req, res) => {
 
     res.status(204).send();
 });
+
+const getPreviousRequestData = (result, userType) => {
+    if (userType === 'supplier') {
+        return {
+            _id: result._id,
+            shortId: result.shortId,
+            supplierId: result.supplierId,
+            supplierName: result.supplierName,
+            manufacturerName: result.manufacturerName,
+            manufacturerId: result.manufacturerId,
+            supplyingRawMaterials: result.supplyingRawMaterials,
+            subtotal_items: result.subtotal_items,
+            shipping_cost: result.shipping_cost,
+            total_price: result.total_price,
+            payment_method: result.payment_method,
+            status: 'delivered',  // Adjust as needed
+            arrivalAddress: result.arrivalAddress,
+            departureAddress: result.departureAddress,
+            transporterId: result.transporterId,
+            transporterName: result.transporterName,
+            estimated_delivery_date: result.estimated_delivery_date,
+            actual_delivery_date: result.actual_delivery_date,
+            notes: result.notes,
+            tracking_number: result.tracking_number,
+            transportRequest_id: result.transportRequest_id,
+            contract_id: result.contract_id,
+        };
+    }
+    //  else if(userType === 'manufacturer') {
+    // //   // Handle other user types here, returning a different structure if needed
+    // //   return {
+
+    // //   };
+    // }
+};

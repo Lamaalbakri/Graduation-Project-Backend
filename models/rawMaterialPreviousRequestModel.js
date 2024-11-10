@@ -139,19 +139,16 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
         departureAddress: {//supplier address
             street: {
                 type: String,
-                required: true,
                 trim: true,
                 lowercase: true,
             },
             city: {
                 type: String,
-                required: true,
                 trim: true,
                 lowercase: true,
             },
             neighborhood: {
                 type: String,
-                required: true,
                 trim: true,
                 lowercase: true,
             },
@@ -162,27 +159,22 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
             country: {
                 type: String,
                 trim: true,
-                required: true,
                 lowercase: true,
             },
         },
         transporterId: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
             ref: 'Transporters',
         },
         transporterName: {
             type: String,
             trim: true,
             lowercase: true,
-            required: true,
         },
         estimated_delivery_date: {
-            required: true,
-            type: Date,
+            type: [Date],
         },
         actual_delivery_date: {
-            required: true,
             type: Date,
         },
         notes: {
@@ -195,7 +187,6 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
             trim: true,
         },
         transportRequest_id: {
-            required: true,
             type: String,
             trim: true,
         },
