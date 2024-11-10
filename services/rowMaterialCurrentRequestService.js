@@ -150,14 +150,13 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const transportRequest_id = req.body.transportRequest_id || '';
     const contract_id = req.body.contract_id || ''
 
-    // التحقق من الكمية المتوفرة قبل متابعة إنشاء الطلب
+    // Check the available quantity before proceeding to create the order
     const insufficientItems = [];
     for (let i = 0; i < supplyingRawMaterials.length; i++) {
         const item = supplyingRawMaterials[i];
         const rawMaterial = await ManageRawMaterialModel.findOne({ _id: item.rawMaterial_id, supplierId: supplierId });
-        console.log(rawMaterial)
         if (!rawMaterial || rawMaterial.quantity < item.quantity) {
-            // إذا كانت الكمية المطلوبة أكبر من المتوفرة
+            // If the quantity requested is greater than the quantity available
             insufficientItems.push({
                 rawMaterialName: item.rawMaterial_name,
                 requestedQuantity: item.quantity,
@@ -170,17 +169,20 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
         return res.status(400).json({ error: 'Some items are unavailable or have insufficient stock.', insufficientItems });
     }
 
-    // تقليص الكمية من ManageRawMaterial بعد التحقق من الكميات
-    for (let i = 0; i < supplyingRawMaterials.length; i++) {
-        const item = supplyingRawMaterials[i];
-        const rawMaterial = await ManageRawMaterialModel.findOne({ _id: item.item_id, supplierId: supplierId });
 
+    // Reduce quantity from ManageRawMaterial after checking quantities
+    for (let i = 0; i < supplyingRawMaterials.length; i++) {
+
+        const item = supplyingRawMaterials[i];
+        const rawMaterial = await ManageRawMaterialModel.findOne({ _id: item.rawMaterial_id, supplierId: supplierId });
         if (rawMaterial && rawMaterial.quantity >= item.quantity) {
-            // تقليص الكمية المتوفرة
-            await ManageRawMaterialModel.findByIdAndUpdate(item.item_id, {
+            console.log(item.quantity)
+            // Reduce the available quantity
+            const updatedRawMaterial = await ManageRawMaterialModel.findOneAndUpdate({ _id: item.rawMaterial_id, supplierId: supplierId }, {
                 $inc: { quantity: -item.quantity }
             });
         }
+
     }
 
     //Async Await Syntax 
