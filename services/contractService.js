@@ -118,11 +118,9 @@ exports.createContract = asyncHandler(async (req, res) => {
         const totalBuyerPayment = Math.round(extractedData.extractedTotalBuyerPayment * 100);
         const totalTransportPayment = Math.round(extractedTotalTransportPayment * 100);
 
-        const sellerAddress = [departureAddress.city, departureAddress.neighborhood,
-        departureAddress.street].filter(Boolean).join(", ");
+        const sellerAddress = [departureAddress.city, departureAddress.neighborhood].filter(Boolean).join(", ");
 
-        const buyerAddress = [departureAddress.city, arrivalAddress.neighborhood,
-        arrivalAddress.street].filter(Boolean).join(", ");
+        const buyerAddress = [arrivalAddress.city, arrivalAddress.neighborhood].filter(Boolean).join(", ");
 
         const itemNames = extractedData.extractedItems.map((item) => ethers.encodeBytes32String(item.itemName));
         const quantities = extractedData.extractedItems.map((item) => item.quantity);
