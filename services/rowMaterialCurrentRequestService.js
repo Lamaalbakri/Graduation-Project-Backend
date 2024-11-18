@@ -143,7 +143,6 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const tracking_number = req.body.tracking_number || '';
     const transportRequest_id = req.body.transportRequest_id || '';
     const contract_id = req.body.contract_id || ''
-
     // Check the available quantity before proceeding to create the order
     const insufficientItems = [];
     for (let i = 0; i < supplyingRawMaterials.length; i++) {
@@ -164,19 +163,37 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     }
 
 
-    // Reduce quantity from ManageRawMaterial after checking quantities
+    // Check quantity before updating using Optimistic Locking
     for (let i = 0; i < supplyingRawMaterials.length; i++) {
 
         const item = supplyingRawMaterials[i];
         const rawMaterial = await ManageRawMaterialModel.findOne({ _id: item.rawMaterial_id, supplierId: supplierId });
         if (rawMaterial && rawMaterial.quantity >= item.quantity) {
             console.log(item.quantity)
-            // Reduce the available quantity
-            const updatedRawMaterial = await ManageRawMaterialModel.findOneAndUpdate({ _id: item.rawMaterial_id, supplierId: supplierId }, {
-                $inc: { quantity: -item.quantity }
-            });
-        }
 
+            // Update quantity by checking version
+            const updatedRawMaterial = await ManageRawMaterialModel.findOneAndUpdate(
+                {
+                    _id: item.rawMaterial_id,
+                    supplierId: supplierId,
+                    quantity: { $gte: item.quantity },
+                },
+                {
+                    $inc: {
+                        quantity: -item.quantity,
+                        version: 1
+                    }
+                },
+                { new: true }
+            );
+            console.log('Checking optimistic locking...');
+            if (!updatedRawMaterial) {
+                console.log('Data has been updated by another user.');
+                return res.status(400).json({
+                    error: 'Data has been updated by another user, please try again.'
+                });
+            }
+        }
     }
 
     //Async Await Syntax 
@@ -206,6 +223,7 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     res.status(201).json({ data: RawMaterialCurrentRequest });
 
 });
+
 
 
 // @desc Update Specific Raw Material Request 

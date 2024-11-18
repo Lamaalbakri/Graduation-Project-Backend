@@ -12,23 +12,27 @@ const ManageRawMaterialSchema = new mongoose.Schema({
   slug: {
     type: String,
     lowercase: true,
-    trim: true, 
+    trim: true,
   },
   quantity: {
     type: Number,
     required: true,
     min: 1,
   },
+  version: {
+    type: Number,
+    default: 0
+  },
   description: {
     type: String,
     required: true,
     minlength: [10, "Description must be at least 10 characters long"],
-    trim: true, 
+    trim: true,
   },
   storageInfo: {
     type: String,
     required: true,
-    trim: true, 
+    trim: true,
   },
   price: {
     type: Number,
@@ -63,7 +67,7 @@ const ManageRawMaterialSchema = new mongoose.Schema({
   units: {
     type: [String],
     required: true,
-    trim: true 
+    trim: true
   }
 }, { timestamps: true });
 
