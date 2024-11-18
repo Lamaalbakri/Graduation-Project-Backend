@@ -8,11 +8,6 @@ const ManageRawMaterialModel = require('../models/ManageRawMaterialModel');
 // @route GET /api/v1/rawMaterialCurrentRequest
 // @access Public
 exports.getRawMaterialCurrentRequests = asyncHandler(async (req, res) => {
-    // const page = req.query.page * 1 || 1;//To divide data into pages
-    // const limit = req.query.limit * 1 || 5;//Number of data to appear on each page
-    // const skip = (page - 1) * limit;//If I was on page  (2), I would skip the number of previous pages minus the page I am on multiplied by the number of data in it.
-
-
     const userType = req.user.userType;
     const userId = req.user._id;
 
@@ -131,7 +126,6 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
 
     const supplierId = req.body.supplierId;
     const supplierName = req.body.supplierName;
-    //const manufacturerId= req.body.manufacturerId;
     const manufacturerName = req.body.manufacturerName;
     const supplyingRawMaterials = req.body.supplyingRawMaterials;
     const subtotal_items = req.body.subtotal_items;
@@ -235,11 +229,6 @@ exports.updateRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
         return res.status(403).json({ msg: 'You do not have permission to access this request.' });
     }
-    // const accessibleRequests = requests.filter((request) =>
-    //     (userType === 'supplier' && request.supplierId.toString() === userId.toString()) ||
-    //     (userType === 'manufacturer' && request.manufacturerId.toString() === userId.toString())
-    // );
-
 
     const updatedRequest = await RawMaterialCurrentRequestModel.findOneAndUpdate(
         { shortId: id },//identifier to find the request 
@@ -266,9 +255,6 @@ exports.deleteRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });
     }
 
-    // if (userType === 'supplier' && request.supplierId.toString() !== userId.toString()) {
-    //     return res.status(403).json({ msg: 'Access denied: You do not have permission to delete this request.' });
-    // }
     //Delete request
     await RawMaterialCurrentRequestModel.findOneAndDelete({ shortId: id });
 

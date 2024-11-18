@@ -23,6 +23,9 @@ const addressRoute = require('./routes/addressRoute');
 const shoppingBasketRoute = require('./routes/shoppingBasketRoute');
 const supplierRoutes = require('./routes/supplierRoute')
 const contractRoute = require('./routes/contractRoute')
+const manageGoodsManufacturerRoute = require('./routes/ManageGoodsManufacturerRoute')
+const goodsManufacturersCurrentRequestRoute = require('./routes/goodsManufacturersCurrentRequestRoute')
+const goodsManufacturersPreviousRequestRoute = require('./routes/goodsManufacturersPreviousRequestRoute')
 
 // Connect with DB
 dbConnection();
@@ -62,6 +65,9 @@ app.use('/api/v1/address', addressRoute);
 app.use('/api/v1/shoppingBasket', shoppingBasketRoute);
 app.use('/api/v1/supplier', supplierRoutes);
 app.use('/api/v1/contract', contractRoute);
+app.use('/api/v1/manageGoodsManufacturer', manageGoodsManufacturerRoute);
+app.use('/api/v1/goodsManufacturersCurrentRequest', goodsManufacturersCurrentRequestRoute)
+app.use('/api/v1/goodsManufacturersPreviousRequest', goodsManufacturersPreviousRequestRoute)
 
 // Get the port from config.env file
 const PORT = process.env.PORT || 8500;

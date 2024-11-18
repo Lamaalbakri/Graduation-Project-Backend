@@ -1,44 +1,45 @@
-const mongoose = require('mongoose');//import mongoose 
+const mongoose = require('mongoose'); 
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; 
 const nanoid = customAlphabet(alphabet, 8); 
 
-
-const RawMaterialPreviousRequestSchema = new mongoose.Schema(
+const GoodsManufacturersCurrentRequestSchema = new mongoose.Schema(
     {
-        shortId: {
+        shortId: {// for the order it is extra with object id
             type: String,
-            required: true,
+            unique: true,
+            default: () => `d${nanoid()}`,
+            immutable: true,
         },
-        supplierId: {
+        manufacturerId: {//who will receive the order
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Suppliers',
             required: true,
-        },
-        supplierName: {//who will receive the order
-            type: String,
-            required: true,
-            trim: true,
-            lowercase: true,
-        },
-        manufacturerId: {
-            type: mongoose.Schema.Types.ObjectId,
             ref: 'Manufacturers',
-            required: true,
         },
-        manufacturerName: {//who will send the order
+        manufacturerName: {//who will receive the order
             type: String,
             required: true,
             trim: true,
             lowercase: true,
         },
-        supplyingRawMaterials: [{
-            rawMaterial_id: {
+        distributorId: {//who will send the order
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'Distributors',
+        },
+        distributorName: {//who will send the order
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+        },
+        goodsForDistributors: [{
+            goods_id: {
                 type: String,
                 required: true,
                 trim: true,
             },
-            rawMaterial_name: {
+            goods_name: {
                 type: String,
                 required: true,
                 trim: true,
@@ -61,12 +62,12 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
                 required: true,
                 min: 0,
             },
-            unit: {
+            unit: { 
                 type: String,
                 required: true,
                 trim: true,
             },
-            options: [
+            options: [ 
                 {
                     optionType: {
                         type: String,
@@ -101,10 +102,10 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['delivered', 'rejected'],
-            required: true,
+            enum: ['pending', 'accepted', 'inProgress', 'delivered', 'rejected'],
+            default: 'pending',
         },
-        arrivalAddress: {//manufacturer address
+        arrivalAddress: {// distributor address
             street: {
                 type: String,
                 required: true,
@@ -125,7 +126,7 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
                 type: String,
                 required: true,
                 trim: true,
-                lowercase: true,
+                lowercase: true, 
             },
             country: {
                 type: String,
@@ -134,7 +135,7 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
                 lowercase: true,
             },
         },
-        departureAddress: {//supplier address
+        departureAddress: {// manufacturer address
             street: {
                 type: String,
                 trim: true,
@@ -145,7 +146,7 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
                 trim: true,
                 lowercase: true,
             },
-            neighborhood: {
+            neighborhood: { 
                 type: String,
                 trim: true,
                 lowercase: true,
@@ -192,10 +193,11 @@ const RawMaterialPreviousRequestSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-    }, { timestamps: true })
-    ;
+    },
+    { timestamps: true }
+);
 
 //2- create model
-const RawMaterialPreviousRequestModel = mongoose.model('Raw-Material-Previous-Request', RawMaterialPreviousRequestSchema);
+const GoodsManufacturersCurrentRequestModel = mongoose.model('Goods-Manufacturers-Current-Request', GoodsManufacturersCurrentRequestSchema);
 
-module.exports = RawMaterialPreviousRequestModel
+module.exports = GoodsManufacturersCurrentRequestModel

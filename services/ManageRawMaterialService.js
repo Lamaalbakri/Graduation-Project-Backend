@@ -21,7 +21,7 @@ exports.getMaterialForListOfSupplier = asyncHandler(async (req, res) => {
     .select('suppliersList')
     .populate({
       path: 'suppliersList',
-      select: 'full_name _id' // جلب الحقول المطلوبة فقط
+      select: 'full_name _id' 
     });
 
   console.log(manufacturer);
@@ -35,7 +35,7 @@ exports.getMaterialForListOfSupplier = asyncHandler(async (req, res) => {
     supplierId: { $in: manufacturer.suppliersList.map(supplier => supplier._id) }
   }).populate({
     path: 'supplierId',
-    select: 'full_name _id' // جلب الحقول المطلوبة فقط
+    select: 'full_name _id'
   });
 
   res.status(200).json({ results: materials.length, data: materials });
@@ -108,7 +108,6 @@ exports.getMaterialByNameOrId = async (req, res) => {
       return res.status(404).json({ message: `There is no raw material for this query: ${query}` });
     }
 
-    // Check if the user is the supplier or manufacturer associated with the order
     if (userType === 'supplier' && material.supplierId.toString() !== userId.toString()) {
       return res.status(403).json({ msg: 'You do not have permission to get this material.' });
     }
@@ -192,7 +191,6 @@ exports.deleteRawMaterial = async (req, res) => {
   const userId = req.user._id; // Get user ID
   const userType = req.user.userType;
 
-
   try {
     // Ensure you're querying by the correct field. Assuming shortId is the field name in your DB:
     const material = await RawMaterialModel.findOne({ shortId });
@@ -212,5 +210,3 @@ exports.deleteRawMaterial = async (req, res) => {
     return res.status(500).json({ message: 'Error deleting material', error });
   }
 };
-
-

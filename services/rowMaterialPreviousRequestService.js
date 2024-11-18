@@ -7,9 +7,6 @@ const mongoose = require('mongoose');
 // @route GET /api/v1/rawMaterialPreviousRequest
 // @access Public
 exports.getRawMaterialPreviousRequests = asyncHandler(async (req, res) => {
-    // const page = req.query.page * 1 || 1;//To divide data into pages
-    // const limit = req.query.limit * 1 || 5;//Number of data to appear on each page
-    // const skip = (page - 1) * limit;//If I was on page  (2), I would skip the number of previous pages minus the page I am on multiplied by the number of data in it.
     const userType = req.user.userType;
     const userId = req.user._id;
 
@@ -118,8 +115,6 @@ exports.getRawMaterialPreviousRequestByMName = asyncHandler(async (req, res) => 
 // @route POST /api/v1/rawMaterialPreviousRequest
 // @access Public
 exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
-    // const userId = req.user._id; // Get user ID
-    // const userType = req.user.userType; // Get user type (supplier or manufacturer)
     console.log('try to create previous here')
     const {
         _id,
@@ -178,15 +173,6 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
         transportRequest_id,
         contract_id,
     };
-
-    // // If the shortId exists, we add it to the transmitted data.
-    // if (shortId) {
-    //     rawMaterialRequestData.shortId = shortId;
-    // }
-    // // If the _id exists, we add it to the transmitted data.
-    // if (_id) {
-    //     rawMaterialRequestData._id = _id;
-    // }
 
     const RawMaterialPreviousRequest = await RawMaterialPreviousRequestModel.create(rawMaterialRequestData);
     console.log('done here previous serves')

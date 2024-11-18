@@ -3,7 +3,7 @@ const { customAlphabet } = require('nanoid');
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 const nanoid = customAlphabet(alphabet, 8);
 
-const ManageRawMaterialSchema = new mongoose.Schema({
+const ManageGoodsManufacturerSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -45,12 +45,12 @@ const ManageRawMaterialSchema = new mongoose.Schema({
     default: () => nanoid(),
     immutable: true,
   },
-  supplierId: {
+  manufacturerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Suppliers',
+    ref: 'Manufacturers',
     required: false, // need to set it to false until Supplier collection is created . Otherwise, error
   },
-  materialOption: [{
+  goodsOption: [{
     optionName: {
       type: String,
     },
@@ -59,7 +59,6 @@ const ManageRawMaterialSchema = new mongoose.Schema({
       default: [],
     },
   }],
-
   units: {
     type: [String],
     required: true,
@@ -68,4 +67,4 @@ const ManageRawMaterialSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 //2- create model
-module.exports = mongoose.model('Manage-Raw-Materials', ManageRawMaterialSchema);
+module.exports = mongoose.model('Manage-Goods-Manufacturers', ManageGoodsManufacturerSchema);
