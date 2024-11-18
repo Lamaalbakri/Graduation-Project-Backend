@@ -26,7 +26,7 @@ const contractRoute = require('./routes/contractRoute')
 const manageGoodsManufacturerRoute = require('./routes/ManageGoodsManufacturerRoute')
 const goodsManufacturersCurrentRequestRoute = require('./routes/goodsManufacturersCurrentRequestRoute')
 const goodsManufacturersPreviousRequestRoute = require('./routes/goodsManufacturersPreviousRequestRoute')
-
+const feedbackRoutes = require('./routes/feedbackRoute')
 // Connect with DB
 dbConnection();
 
@@ -68,7 +68,7 @@ app.use('/api/v1/contract', contractRoute);
 app.use('/api/v1/manageGoodsManufacturer', manageGoodsManufacturerRoute);
 app.use('/api/v1/goodsManufacturersCurrentRequest', goodsManufacturersCurrentRequestRoute)
 app.use('/api/v1/goodsManufacturersPreviousRequest', goodsManufacturersPreviousRequestRoute)
-
+app.use('/api/v1/feedback', feedbackRoutes)
 // Get the port from config.env file
 const PORT = process.env.PORT || 8500;
 
