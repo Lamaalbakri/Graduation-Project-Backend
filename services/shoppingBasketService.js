@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler')
 const ShoppingBasketModel = require('../models/shoppingBasketModel');
+const RawMaterialModel = require('../models/ManageRawMaterialModel');
 const { getModelByUserType } = require('../models/userModel');
 const { getItemModelByUserType } = require('../models/itemModel');
 const mongoose = require('mongoose');
@@ -169,8 +170,54 @@ exports.getShoppingBasketDetails = asyncHandler(async (req, res, next) => {
         return res.status(404).json({ message: "Basket not found for this user" });
     }
 
+    // 2) Define the model map
+    const modelMap = {
+        manufacturer: RawMaterialModel,
+        // distributor: ManufacturedGoodsModel,
+        // retailer:,
+    };
+
+    const Model = modelMap[userType];
+
+    if (!Model) {
+        return res.status(400).json({ message: "Invalid user type" });
+    }
+
+    // 3) Fetch details of each item in the basket from the appropriate model
+    const detailedItems = await Promise.all(
+        basket.ShoppingBasketItems.map(async (basketItem) => {
+            // Get item details using the determined model
+            const itemDetails = await Model.findById(basketItem.item_id);
+            // Determine stock status
+            let stockStatus = "Available"; // Default to available
+            let stockQuantity = itemDetails.quantity;
+            if (itemDetails) {
+                if (stockQuantity === 0) {
+                    stockStatus = "Out of Stock";
+                } else if (stockQuantity < 10) {
+                    stockStatus = "Stock is Low";
+                }
+            }
+
+            // Return the basket item with additional details
+            return {
+                ...basketItem.toObject(),
+                stockStatus,
+                stockQuantity,
+            };
+        })
+    );
+
+    // Replace original items with detailed items
+    basket = {
+        ...basket.toObject(),
+        ShoppingBasketItems: detailedItems,
+    };
+
+    // 4) Calculate the total number of items
     const totalItems = calculateBasketItemCount(basket);
 
+    // 5) Send the response
     res.status(200).json({ numberOfBasketItems: totalItems, data: basket });
 });
 
