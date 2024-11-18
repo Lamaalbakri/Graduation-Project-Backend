@@ -19,6 +19,10 @@ const ManageGoodsManufacturerSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
+  version: {
+    type: Number,
+    default: 0
+  },
   description: {
     type: String,
     required: true,

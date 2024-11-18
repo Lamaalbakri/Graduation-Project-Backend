@@ -150,19 +150,37 @@ exports.createGoodsManufacturerCurrentRequest = asyncHandler(async (req, res) =>
     }
 
 
-    // Reduce quantity from ManageRawMaterial after checking quantities
+    // Check quantity before updating using Optimistic Locking
     for (let i = 0; i < goodsForDistributors.length; i++) {
 
         const item = goodsForDistributors[i];
         const goods = await ManageGoodsManufacturerModel.findOne({ _id: item.goods_id, manufacturerId: manufacturerId });
         if (goods && goods.quantity >= item.quantity) {
             console.log(item.quantity)
-            // Reduce the available quantity
-            const updatedRawMaterial = await ManageGoodsManufacturerModel.findOneAndUpdate({ _id: item.goods_id, manufacturerId: manufacturerId }, {
-                $inc: { quantity: -item.quantity }
-            });
-        }
 
+            // Update quantity by checking version
+            const updateGoods = await ManageGoodsManufacturerModel.findOneAndUpdate(
+                {
+                    _id: item.goods_id,
+                    manufacturerId: manufacturerId,
+                    quantity: { $gte: item.quantity },
+                },
+                {
+                    $inc: {
+                        quantity: -item.quantity,
+                        version: 1
+                    }
+                },
+                { new: true }
+            );
+            console.log('Checking optimistic locking...');
+            if (!updateGoods) {
+                console.log('Data has been updated by another user.');
+                return res.status(400).json({
+                    error: 'Data has been updated by another user, please try again.'
+                });
+            }
+        }
     }
 
     //Async Await Syntax 
