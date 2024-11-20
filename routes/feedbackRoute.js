@@ -1,6 +1,6 @@
 const express = require("express");
 const authService = require("../services/authService");
-const { createFeedback, getFeedback } = require("../services/feedbackService");
+const { createFeedback, getFeedback, getBuyerFeedback, } = require("../services/feedbackService");
 
 const router = express.Router();
 
@@ -26,4 +26,13 @@ router
     createFeedback
   );
 
+router.route("/buyer-feedback").get(
+  authService.verifyToken,
+  authService.allowedTo(
+    "manufacturer",
+    "distributor",
+    "retailer"
+  ),
+  getBuyerFeedback
+);
 module.exports = router; 
