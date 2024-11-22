@@ -1,33 +1,33 @@
-const GoodsManufacturerModel = require('../models/ManageGoodsManufacturerModel');
+const GoodsDistributorModel = require('../models/ManageGoodsDistributorModel');
 const asyncHandler = require('express-async-handler')
-const Manufacturer = require('../models/manufacturersModel');
 const Distributor = require('../models/distributorsModel')
+const Retailer = require('../models/retailersModel');
 
-exports.getGoodsForListOfManufacturer = asyncHandler(async (req, res) => {
+exports.getGoodsForListOfDistributor = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Retrieve user ID from token
     const userType = req.user.userType; // Retrieve user type from token
-    if (userType !== 'distributor') {
+    if (userType !== 'retailer') {
       return res.status(403).json({ message: "Unauthorized access" });
     }
-    // Find the distributor by user ID
-    const distributor = await Distributor.findById(userId)
-      .select('manufacturersList')
+    // Find the retailer by user ID
+    const retailer = await Retailer.findById(userId)
+      .select('distributorsList')
       .populate({
-        path: 'manufacturersList',
+        path: 'distributorsList',
         select: 'full_name _id'
       });
   
-    console.log(distributor);
-    if (!distributor) {
+    console.log(retailer);
+    if (!retailer) {
       res.status(404);
-      throw new Error('Distributor not found');
+      throw new Error('Retailer not found');
     }
   
-    // Fetch goods associated with the manufacturers
-    const goods = await GoodsManufacturerModel.find({
-        manufacturerId: { $in: distributor.manufacturersList.map(manufacturer => manufacturer._id) }
+    // Fetch goods associated with the distributors
+    const goods = await GoodsDistributorModel.find({
+        distributorId: { $in: retailer.distributorsList.map(distributor => distributor._id) }
     }).populate({
-      path: 'manufacturerId',
+      path: 'distributorId',
       select: 'full_name _id'
     });
   
@@ -38,7 +38,7 @@ exports.getGoodsForListOfManufacturer = asyncHandler(async (req, res) => {
 exports.getGoods = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Retrieve user ID from token
   
-    const goods = await GoodsManufacturerModel.find({ manufacturerId: userId });
+    const goods = await GoodsDistributorModel.find({ distributorId: userId });
     res.status(200).json({ results: goods.length, data: goods });
 });
   
@@ -58,14 +58,14 @@ exports.getGoodsById = asyncHandler(async (req, res) => {
       return res.status(400).json({ msg: `Invalid shortId format: ${id}` });
     }
   
-    const goods = await GoodsManufacturerModel.findOne({ shortId: id });
+    const goods = await GoodsDistributorModel.findOne({ shortId: id });
   
     // check if the request is null or undefined
     if (!goods) {
       return res.status(404).json({ msg: `There is no goods for this id: ${id}` });
     }
     const hasAccess =
-      (userType === 'manufacturer' && goods.manufacturerId.toString() === userId.toString());
+      (userType === 'distributor' && goods.distributorId.toString() === userId.toString());
   
     if (!hasAccess) {
       return res.status(401).json({ msg: 'You do not have permission to get the result.' });
@@ -81,8 +81,8 @@ exports.getGoodsByNameOrId = async (req, res) => {
     const userId = req.user._id; // Get user ID
   
     try {
-      // Use findOne to get a single goods that matches the name or shortId
-      const goods = await GoodsManufacturerModel.findOne({
+        // Use findOne to get a single goods that matches the name or shortId
+      const goods = await GoodsDistributorModel.findOne({
         $or: [
           { name: new RegExp(`^${query}$`, "i") },
           { shortId: query }
@@ -93,7 +93,7 @@ exports.getGoodsByNameOrId = async (req, res) => {
         return res.status(404).json({ message: `There is no goods for this query: ${query}` });
       }
   
-      if (userType === 'manufacturer' && goods.manufacturerId.toString() !== userId.toString()) {
+      if (userType === 'distributor' && goods.distributorId.toString() !== userId.toString()) {
         return res.status(403).json({ msg: 'You do not have permission to get this goods.' });
       }
   
@@ -111,21 +111,21 @@ exports.createGoods = async (req, res) => {
   
     try {
       const { name, quantity, description, storageInfo, price, image, goodsOption, units } = req.body;
-      const goods = new GoodsManufacturerModel({
+      const goods = new GoodsDistributorModel({
         name,
         quantity,
         description,
         storageInfo,
-        manufacturerId: userId,
+        distributorId: userId,
         price,
         image,
         goodsOption,
         units
       });
   
-      await Manufacturer.findByIdAndUpdate(
+      await Distributor.findByIdAndUpdate(
         userId,
-        { $addToSet: { manufacturerGoodsList: goods._id } },
+        { $addToSet: { distributorGoodsList: goods._id } },
         { new: true }
       );
       await goods.save();
@@ -144,15 +144,15 @@ exports.updateGoods = async (req, res) => {
     const userType = req.user.userType;
   
     try {
-      const goods = await GoodsManufacturerModel.findOne({ shortId });
+      const goods = await GoodsDistributorModel.findOne({ shortId });
       if (!goods) {
         res.status(404).json({ msg: `No goods for this id ${shortId}` });
       }
       // Check if the user is associated with the request
-      if (userType === 'manufacturer' && goods.manufacturerId.toString() !== userId.toString()) {
+      if (userType === 'distributor' && goods.distributorId.toString() !== userId.toString()) {
         return res.status(403).json({ msg: 'You do not have permission to update this goods.' });
       }
-      const updateGoods = await GoodsManufacturerModel.findOneAndUpdate(
+      const updateGoods = await GoodsDistributorModel.findOneAndUpdate(
         { shortId }, req.body, { new: true }
       );
   
@@ -172,17 +172,17 @@ exports.deleteGoods = async (req, res) => {
   
     try {
       // Ensure you're querying by the correct field. Assuming shortId is the field name in your DB:
-      const goods = await GoodsManufacturerModel.findOne({ shortId });
+      const goods = await GoodsDistributorModel.findOne({ shortId });
   
       if (!goods) {
         return res.status(404).json({ message: `No goods found with shortId ${shortId}` });
       }
-      if (userType === 'manufacturer' && goods.manufacturerId.toString() !== userId.toString()) {
+      if (userType === 'distributor' && goods.distributorId.toString() !== userId.toString()) {
         return res.status(403).json({ msg: 'Access denied: You do not have permission to delete this goods.' });
       }
   
       //delete after check permission 
-      await GoodsManufacturerModel.findOneAndDelete({ shortId });
+      await GoodsDistributorModel.findOneAndDelete({ shortId });
   
       return res.status(200).json({ success: true, msg: 'Goods successfully deleted' }); // Changed status to 200
     } catch (error) {

@@ -47,12 +47,6 @@ const retailerSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Distributors' // الربط مع كولكشن الموردين
       }
-    ],
-    manufacturersList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Manufacturers' // الربط مع كولكشن المصانع
-      }
     ]
   }
 );

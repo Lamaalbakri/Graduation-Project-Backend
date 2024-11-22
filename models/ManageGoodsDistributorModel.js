@@ -3,7 +3,7 @@ const { customAlphabet } = require('nanoid');
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 const nanoid = customAlphabet(alphabet, 8);
 
-const ManageGoodsManufacturerSchema = new mongoose.Schema({
+const ManageGoodsDistributorSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -49,9 +49,9 @@ const ManageGoodsManufacturerSchema = new mongoose.Schema({
     default: () => nanoid(),
     immutable: true,
   },
-  manufacturerId: {
+  distributorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Manufacturers',
+    ref: 'Distributors',
     required: false, 
   },
   goodsOption: [{
@@ -71,4 +71,4 @@ const ManageGoodsManufacturerSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 //2- create model
-module.exports = mongoose.model('Manage-Goods-Manufacturers', ManageGoodsManufacturerSchema);
+module.exports = mongoose.model('Manage-Goods-Distributors', ManageGoodsDistributorSchema);

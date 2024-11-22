@@ -56,7 +56,7 @@ const distributorSchema = new mongoose.Schema(
     distributorGoodsList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'DistributorGoods' // الربط مع كولكشن السلع التي يمتلكها الموزع
+        ref: 'Manage-Goods-Distributors' // الربط مع كولكشن السلع التي يمتلكها الموزع
       }
     ]
   }

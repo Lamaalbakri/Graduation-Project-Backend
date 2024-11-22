@@ -49,7 +49,7 @@ const manufacturerSchema = new mongoose.Schema({
   manufacturerGoodsList: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'ManufacturerGoods' // إشارة إلى قائمة البضائع المصنعة
+      ref: 'Manage-Goods-Manufacturers' // إشارة إلى قائمة البضائع المصنعة
     }
   ],
   addresses: [
