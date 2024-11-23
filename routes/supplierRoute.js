@@ -5,6 +5,3 @@ const authService = require("../services/authService")
 
 router.get('/:category/:searchText', authService.verifyToken, searchSuppliers);
 module.exports = router; 
-
-
-// look for the category and search box 

@@ -1,7 +1,8 @@
 const asyncHandler = require('express-async-handler')
 const ShoppingBasketModel = require('../models/shoppingBasketModel');
 const RawMaterialModel = require('../models/ManageRawMaterialModel');
-const { getModelByUserType } = require('../models/userModel');
+const ManufacturedGoodsModel = require('../models/ManageGoodsManufacturerModel');
+const DistributoredGoodsModel = require('../models/ManageGoodsDistributorModel');
 const { getItemModelByUserType } = require('../models/itemModel');
 const mongoose = require('mongoose');
 
@@ -27,17 +28,6 @@ function calculateTotalItems(baskets) {
         }, 0);
     }, 0);
 }
-
-
-//function to get sellerId depend on user type
-// function getSellerId(item, userType) {
-//     if (userType === 'manufacturer') return item.supplierId;
-//     //if (userType === 'distributor') return item.manufacturerId;
-//     //if(userType === 'retailer')return item.manufacturerId;
-//     //if(userType === 'retailer')return item.distributor;
-
-//     return null;
-// }
 
 // Function to calculate subtotal_items, shipping_cost and total_price
 function calculateBasketTotals(basket, shippingPercentage = 10) {
@@ -75,11 +65,6 @@ exports.addItemToBasket = asyncHandler(async (req, res, next) => {
         return res.status(404).json({ message: "Item not found" });
     }
 
-    // const sellerId = getSellerId(item, userType);
-    // if (!sellerId) {
-    //     return res.status(400).json({ message: "Seller not found for the selected item" });
-    // }
-
     // Make sure quantity and unit_price are converted to numbers.
     const quantityNumber = Number(quantity);
     const unitPrice = Number(item.price);
@@ -88,7 +73,6 @@ exports.addItemToBasket = asyncHandler(async (req, res, next) => {
     if (isNaN(quantityNumber) || isNaN(unitPrice)) {
         return res.status(400).json({ message: "Invalid quantity or unit price" });
     }
-
 
     //1)Get Basket for logged user
     let basket = await ShoppingBasketModel.findOne({ buyerId, sellerId });
@@ -123,7 +107,6 @@ exports.addItemToBasket = asyncHandler(async (req, res, next) => {
 
         if (itemIndex > -1) {
             const basketItem = basket.ShoppingBasketItems[itemIndex];
-            // basket.ShoppingBasketItems[itemExistIndex].quantity += quantityNumber;
             basketItem.quantity += quantityNumber;
             basket.ShoppingBasketItems[itemIndex] = basketItem;
         } else {
@@ -173,8 +156,8 @@ exports.getShoppingBasketDetails = asyncHandler(async (req, res, next) => {
     // 2) Define the model map
     const modelMap = {
         manufacturer: RawMaterialModel,
-        // distributor: ManufacturedGoodsModel,
-        // retailer:,
+        distributor: ManufacturedGoodsModel,
+        retailer: DistributoredGoodsModel,
     };
 
     const Model = modelMap[userType];
@@ -251,7 +234,6 @@ exports.removeSpecificBasketItem = asyncHandler(async (req, res, next) => {
     const { itemId, basketId } = req.body;
 
     // Validate itemId as a valid ObjectId
-    // const itemId = req.params.itemId;
     if (!mongoose.Types.ObjectId.isValid(itemId)) {
         return res.status(400).json({ message: "Invalid item ID format" });
     }
@@ -298,7 +280,6 @@ exports.updateBasketItemQuantity = asyncHandler(async (req, res, next) => {
 
     if (itemIndex > -1) {
         const basketItem = basket.ShoppingBasketItems[itemIndex];
-        // basket.ShoppingBasketItems[itemExistIndex].quantity += quantityNumber;
         basketItem.quantity = quantity;
         basket.ShoppingBasketItems[itemIndex] = basketItem;
     } else {
@@ -334,7 +315,6 @@ exports.clearBasket = asyncHandler(async (req, res, next) => {
         return res.status(404).json({ error: "Basket not found" });
     }
 
-    // استرجاع عدد العناصر المتبقية في سلال التسوق الخاصة بالمستخدم
     const remainingBaskets = await ShoppingBasketModel.countDocuments({ buyerId });
 
     res.status(200).json({

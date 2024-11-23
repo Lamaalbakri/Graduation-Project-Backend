@@ -22,6 +22,8 @@ const userRoutes = require('./routes/userRoutes');
 const addressRoute = require('./routes/addressRoute');
 const shoppingBasketRoute = require('./routes/shoppingBasketRoute');
 const supplierRoutes = require('./routes/supplierRoute')
+const ManufacturerRoute = require('./routes/manufacturerRoute')
+const DistributorRoute = require('./routes/distributorRoute')
 const contractRoute = require('./routes/contractRoute')
 const manageGoodsManufacturerRoute = require('./routes/ManageGoodsManufacturerRoute')
 const goodsManufacturersCurrentRequestRoute = require('./routes/goodsManufacturersCurrentRequestRoute')
@@ -68,6 +70,8 @@ app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/address', addressRoute);
 app.use('/api/v1/shoppingBasket', shoppingBasketRoute);
 app.use('/api/v1/supplier', supplierRoutes);
+app.use('/api/v1/manufacturer', ManufacturerRoute)
+app.use('/api/v1/distributor', DistributorRoute)
 app.use('/api/v1/contract', contractRoute);
 app.use('/api/v1/manageGoodsManufacturer', manageGoodsManufacturerRoute);
 app.use('/api/v1/goodsManufacturersCurrentRequest', goodsManufacturersCurrentRequestRoute)

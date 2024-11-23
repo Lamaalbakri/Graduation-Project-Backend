@@ -9,13 +9,13 @@ const { addItemToBasket,
 const router = express.Router();
 
 router.route('/')
-    .post(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), addItemToBasket)
-    .get(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), getShoppingBasketList)
-    .delete(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), clearBasket)
+    .post(authService.verifyToken, authService.allowedTo('manufacturer', 'distributor', 'retailer'), addItemToBasket)
+    .get(authService.verifyToken, authService.allowedTo('manufacturer', 'distributor', 'retailer'), getShoppingBasketList)
+    .delete(authService.verifyToken, authService.allowedTo('manufacturer', 'distributor', 'retailer'), clearBasket)
 router.route('/details')
-    .post(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), getShoppingBasketDetails);
+    .post(authService.verifyToken, authService.allowedTo('manufacturer', 'distributor', 'retailer'), getShoppingBasketDetails);
 router.route('/itemId')
-    .put(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), updateBasketItemQuantity)
-    .delete(authService.verifyToken, authService.allowedTo('manufacturer', 'distrebuter', 'retailer'), removeSpecificBasketItem)
+    .put(authService.verifyToken, authService.allowedTo('manufacturer', 'distributor', 'retailer'), updateBasketItemQuantity)
+    .delete(authService.verifyToken, authService.allowedTo('manufacturer', 'distributor', 'retailer'), removeSpecificBasketItem)
 
 module.exports = router;

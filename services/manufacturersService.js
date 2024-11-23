@@ -47,6 +47,31 @@ const registerManufacturer = async (data) => {
   }
 };
 
+const searchManufacturers = async (req, res) => {
+  const { category, searchText } = req.params;
+  let searchQuery = {};
+
+  if (category && category !== "null") {
+    searchQuery.category = category;
+  }
+
+  if (searchText && searchText !== "null") {
+    searchQuery.$or = [
+      { full_name: { $regex: searchText, $options: 'i' } },
+      { shortId: { $regex: searchText, $options: 'i' } }
+    ];
+  }
+
+  try {
+    const manufacturers = await ManufacturerModel.find(searchQuery);
+    res.status(200).json({ data: manufacturers });
+  } catch (error) {
+    console.log("error: ", error);
+    res.status(500).json({ error: `Search failed: ${error.message}` });
+  }
+};
+
 module.exports = {
   registerManufacturer,
+  searchManufacturers
 };
