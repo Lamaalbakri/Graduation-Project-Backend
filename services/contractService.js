@@ -7,6 +7,8 @@ const contractAddress = process.env.CONTRACT_ADDRESS;// عنوان العقد ا
 const ContractModel = require('../models/contractModel');
 const TransporterCurrentRequestModel = require('../models/transporterCurrentRequestModel');
 const RawMaterialCurrentRequestModel = require('../models/rawMaterialCurrentRequestModel');
+const GoodsDistributorsCurrentRequestModel = require('../models/goodsDistributorsCurrentRequestModel');
+const GoodsManufacturersCurrentRequestModel = require('../models/goodsManufacturersCurrentRequestModel');
 const { getModelByUserType } = require("../models/userModel");
 
 // إعداد مزود الشبكة لشبكة Sepolia عبر Alchemy
@@ -20,7 +22,7 @@ const supplyChainContract = new ethers.Contract(contractAddress, contractABI, wa
 exports.createContract = asyncHandler(async (req, res) => {
     try {
         const { transportOId: extractedTransportOrderId, purchaseOId: extractedPurchaseOrderId } = req.body;
-
+        console.log(extractedTransportOrderId, extractedPurchaseOrderId)
         // الخطوة 1: البحث في TransportCurrentRequest
         const transportRequest = await TransporterCurrentRequestModel.findOne({ shortId: extractedTransportOrderId });
 
@@ -42,9 +44,10 @@ exports.createContract = asyncHandler(async (req, res) => {
             estimated_delivery_date//estimatedDeliveryTimes
         } = transportRequest;
 
-
+        console.log(transportRequest, sender_type)
         // استخدام الدالة لاختيار الموديل المناسب بناءً على `sender_type` و `receiver_type`
         const sellerModel = getModelByUserType(sender_type);
+
         const buyerModel = getModelByUserType(receiver_type);
         const transporterModel = getModelByUserType('transporter');
         // استعلام للحصول على معلومات المرسل والمستقبل
@@ -67,7 +70,7 @@ exports.createContract = asyncHandler(async (req, res) => {
         const extractedTransporterName = transporterInfo.full_name;
         const extractedTransporterId = transporterInfo.shortId;
 
-
+        console.log(extractedSellerName, extractedSellerShortId, sender_type)
         // تحديد الكولكشن بناءً على sender_type
         let requestData, extractedData;
         switch (sender_type) {
@@ -92,14 +95,49 @@ exports.createContract = asyncHandler(async (req, res) => {
                 };
                 break;
             case "manufacturer":
-                // requestData = await ManufacturerGoodsCurrentRequestModel.findOne({ _id: purchaseOrderId });
+                requestData = await GoodsManufacturersCurrentRequestModel.findOne({ shortId: extractedPurchaseOrderId });
+                if (!requestData) {
+                    return res.status(404).json({ message: "Purchase request not found in GoodsManufacturersCurrentRequestModel." });
+                }
+                const manufacturedItem = requestData.goodsForDistributors.map(item => {
+
+                    const options = item.options.map(option => `${option.optionType} ${option.values}`).join(", ");
+                    return {
+                        itemName: item.goods_name,
+                        quantity: item.quantity,
+                        options: options,
+                    };
+                });
+
+                extractedData = {
+                    extractedItems: manufacturedItem,
+                    extractedTotalBuyerPayment: requestData.total_price,
+                };
                 break;
             case "distributor":
-                //requestData = await DistributorGoodsCurrentRequestModel.findOne({ _id: purchaseOrderId });
+                requestData = await GoodsDistributorsCurrentRequestModel.findOne({ shortId: extractedPurchaseOrderId });
+                if (!requestData) {
+                    return res.status(404).json({ message: "Purchase request not found in GoodsDistributorsCurrentRequestModel." });
+                }
+                const distributedItem = requestData.goodsForRetailers.map(item => {
+
+                    const options = item.options.map(option => `${option.optionType} ${option.values}`).join(", ");
+                    return {
+                        itemName: item.goods_name,
+                        quantity: item.quantity,
+                        options: options,
+                    };
+                });
+
+                extractedData = {
+                    extractedItems: distributedItem,
+                    extractedTotalBuyerPayment: requestData.total_price,
+                };
                 break;
             default:
                 return res.status(400).json({ message: "Invalid sender type." });
         }
+        console.log("pass here")
 
         // // الخطوة 2: تنسيق البيانات
         const transportType = temperature === "Refrigerated Delivery" ? 1 : 0;

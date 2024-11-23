@@ -3,6 +3,8 @@ const RawMaterialCurrentRequestModel = require('../models/rawMaterialCurrentRequ
 const RawMaterialPreviousRequestModel = require('../models/rawMaterialPreviousRequestModel');
 const { createRawMaterialPreviousRequest } = require('./rowMaterialPreviousRequestService');
 const { deleteRawMaterialCurrentRequest } = require('./rowMaterialCurrentRequestService');
+const GoodsManufacturersCurrentRequestModel = require('../models/goodsManufacturersCurrentRequestModel');
+const GoodsDistributorsCurrentRequestModel = require('../models/goodsDistributorsCurrentRequestModel');
 
 const asyncHandler = require('express-async-handler')
 
@@ -205,10 +207,10 @@ async function updateSenderStatus(request, status) {
             methodCreate = createRawMaterialPreviousRequest;
             break;
         case 'manufacturer':
-            //currentModel = ManufacturerGoodRequestModel;
+            currentModel = GoodsManufacturersCurrentRequestModel;
             break;
         case 'distributor':
-            //currentModel = DistributorGoodRequestModel;
+            currentModel = GoodsDistributorsCurrentRequestModel;
             break;
         default:
             throw new Error('Unknown sender type.');
