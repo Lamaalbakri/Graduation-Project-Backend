@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');//import mongoose 
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; 
-const nanoid = customAlphabet(alphabet, 8); 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 8);
 
 const RawMaterialCurrentRequestSchema = new mongoose.Schema(
     {
@@ -49,9 +49,8 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
                 required: true,
                 min: 1,
             },
-            image: {///!!!
-                type: String, // if using GridFS for image storage change this to an ObjectID  
-                // required: [true, "Product Image is required"],
+            image: {
+                type: String,
             },
             unit_price: {
                 type: Number,
@@ -63,12 +62,12 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
                 required: true,
                 min: 0,
             },
-            unit: { // وحدة القياس
+            unit: {
                 type: String,
                 required: true,
                 trim: true,
             },
-            options: [ 
+            options: [
                 {
                     optionType: {
                         type: String,
@@ -86,7 +85,6 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
             required: true,
             min: 0,
         },
-        // تكلفة الشحن
         shipping_cost: {
             type: Number,
             required: true,
@@ -124,11 +122,11 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
                 type: String,
                 trim: true,
             },
-            neighborhood: { 
+            neighborhood: {
                 type: String,
                 required: true,
                 trim: true,
-                lowercase: true, 
+                lowercase: true,
             },
             country: {
                 type: String,
@@ -148,10 +146,10 @@ const RawMaterialCurrentRequestSchema = new mongoose.Schema(
                 trim: true,
                 lowercase: true,
             },
-            neighborhood: { 
+            neighborhood: {
                 type: String,
                 trim: true,
-                lowercase: true, 
+                lowercase: true,
             },
             postal_code: {
                 type: String,

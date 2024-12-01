@@ -13,5 +13,3 @@ router.route('/:id')
     .put(authService.verifyToken, authService.allowedTo("supplier", "manufacturer", "distributor", "retailer"), updateAddress);
 module.exports = router;
 
-//const addressRoute = require('./routes/addressRoute');
-//app.use('/api/v1/address', addressRoute);

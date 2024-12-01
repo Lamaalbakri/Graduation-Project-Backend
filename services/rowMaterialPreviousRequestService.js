@@ -1,7 +1,5 @@
-const slugify = require('slugify');
 const asyncHandler = require('express-async-handler')
 const RawMaterialPreviousRequestModel = require('../models/rawMaterialPreviousRequestModel');
-const mongoose = require('mongoose');
 
 // @desc Get list of Raw Material Request 
 // @route GET /api/v1/rawMaterialPreviousRequest
@@ -13,8 +11,8 @@ exports.getRawMaterialPreviousRequests = asyncHandler(async (req, res) => {
     // Filter requests based on userType
     const filter = userType === 'manufacturer' ? { manufacturerId: userId } : { supplierId: userId };
 
-    const RawMaterialPreviousRequests = await RawMaterialPreviousRequestModel.find(filter);//.skip(skip).limit(limit)
-    res.status(200).json({ data: RawMaterialPreviousRequests });//results: RawMaterialPreviousRequests.length, , page
+    const RawMaterialPreviousRequests = await RawMaterialPreviousRequestModel.find(filter);
+    res.status(200).json({ data: RawMaterialPreviousRequests });
 });
 
 // @desc Get Specific Raw Material Request by id
@@ -62,7 +60,7 @@ exports.getRawMaterialPreviousRequestById = asyncHandler(async (req, res) => {
 // @route GET /api/v1/rawMaterialPreviousRequest/manufacturer/slug/:slug
 // @access Public
 exports.getRawMaterialPreviousRequestByMSlug = asyncHandler(async (req, res) => {
-    const { slug } = req.params;//take  slug from / :slug
+    const { slug } = req.params;
     const userType = req.user.userType; // Get user type (supplier or manufacturer)
     const userId = req.user._id; // Get user ID
 
@@ -115,7 +113,7 @@ exports.getRawMaterialPreviousRequestByMName = asyncHandler(async (req, res) => 
 // @route POST /api/v1/rawMaterialPreviousRequest
 // @access Public
 exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
-    console.log('try to create previous here')
+
     const {
         _id,
         shortId,
@@ -143,7 +141,6 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
 
 
     if (!shortId || !_id) {
-        console.log('here the error')
         return res.status(400).json({ error: "shortId and _id are  Missing" });
     }
 
@@ -175,7 +172,7 @@ exports.createRawMaterialPreviousRequest = asyncHandler(async (req, res) => {
     };
 
     const RawMaterialPreviousRequest = await RawMaterialPreviousRequestModel.create(rawMaterialRequestData);
-    console.log('done here previous serves')
+
     res.status(201).json({ data: RawMaterialPreviousRequest });
 });
 

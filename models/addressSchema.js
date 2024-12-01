@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
 
 const AddressSchema = new mongoose.Schema({
-    // address id :ObjectID will be created automatically.
     user_id: {//how own this address
-        type: mongoose.Schema.Types.ObjectId, // إذا كنت تستخدم ObjectId
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
         trim: true,
     },
@@ -25,11 +24,11 @@ const AddressSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
     },
-    neighborhood: { // الحي
+    neighborhood: {
         type: String,
         required: true,
         trim: true,
-        lowercase: true, // تحويل إلى أحرف صغيرة
+        lowercase: true,
     },
     postal_code: {
         type: String,

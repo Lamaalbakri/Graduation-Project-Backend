@@ -15,15 +15,15 @@ exports.getRawMaterialCurrentRequests = asyncHandler(async (req, res) => {
     const filter = userType === 'manufacturer' ? { manufacturerId: userId } : { supplierId: userId };
 
 
-    const RawMaterialCurrentRequests = await RawMaterialCurrentRequestModel.find(filter);//.skip(skip).limit(limit)
-    res.status(200).json({ data: RawMaterialCurrentRequests });//results: RawMaterialCurrentRequests.length, , page
+    const RawMaterialCurrentRequests = await RawMaterialCurrentRequestModel.find(filter);
+    res.status(200).json({ data: RawMaterialCurrentRequests });
 });
 
 // @desc Get Specific Raw Material Request by ID for authorized Supplier or Manufacturer
 // @route GET /api/v1/rawMaterialCurrentRequest/:id
 // @access Public
 exports.getRawMaterialCurrentRequestById = asyncHandler(async (req, res) => {
-    const { id } = req.params; // take id from / :id
+    const { id } = req.params;
     const userType = req.user.userType;
     const userId = req.user._id;
 
@@ -64,7 +64,7 @@ exports.getRawMaterialCurrentRequestById = asyncHandler(async (req, res) => {
 // @route GET /api/v1/rawMaterialCurrentRequest/manufacturer/slug/:slug
 // @access Public
 exports.getRawMaterialCurrentRequestByMSlug = asyncHandler(async (req, res) => {
-    const { slug } = req.params;//take  slug from / :slug
+    const { slug } = req.params;
     const userType = req.user.userType; // Get user type (supplier or manufacturer)
     const userId = req.user._id; // Get user ID
 
@@ -186,9 +186,9 @@ exports.createRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
                 },
                 { new: true }
             );
-            console.log('Checking optimistic locking...');
+
             if (!updatedRawMaterial) {
-                console.log('Data has been updated by another user.');
+
                 return res.status(400).json({
                     error: 'Data has been updated by another user, please try again.'
                 });
@@ -234,10 +234,10 @@ exports.updateRawMaterialCurrentRequest = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Get user ID
     const userType = req.user.userType; // Get user type (supplier or manufacturer)
     const { status } = req.body;
-    console.log("Sending request to update status:", status, id);
+
     // Find the request to check if it is related to the user
     const request = await RawMaterialCurrentRequestModel.findOne({ shortId: id });
-    console.log(request)
+
     // Check if the request exists
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });

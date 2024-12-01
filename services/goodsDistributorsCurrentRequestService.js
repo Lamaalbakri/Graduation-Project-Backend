@@ -56,7 +56,7 @@ exports.getGoodsDistributorCurrentRequestById = asyncHandler(async (req, res) =>
 
 exports.getGoodsDistributorCurrentRequestByMSlug = asyncHandler(async (req, res) => {
     const { slug } = req.params;//take  slug from / :slug
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const userId = req.user._id; // Get user ID
 
     const request = await GoodsDistributorsCurrentRequestModel.findOne({ slug });
@@ -79,7 +79,7 @@ exports.getGoodsDistributorCurrentRequestByMSlug = asyncHandler(async (req, res)
 
 exports.getGoodsDistributorCurrentRequestByName = asyncHandler(async (req, res) => {
     const { distributorName } = req.params;
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const userId = req.user._id; // Get user ID
 
     const requests = await GoodsDistributorsCurrentRequestModel.find({ distributorName: new RegExp(`^${distributorName}$`, "i") });
@@ -104,7 +104,7 @@ exports.getGoodsDistributorCurrentRequestByName = asyncHandler(async (req, res) 
 
 exports.createGoodsDistributorCurrentRequest = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Get user ID
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
 
     if (userType !== 'retailer') {
         return res.status(403).json({ msg: 'Access denied: Only retailers can create goods requests.' });
@@ -156,27 +156,25 @@ exports.createGoodsDistributorCurrentRequest = asyncHandler(async (req, res) => 
         const item = goodsForRetailers[i];
         const goods = await ManageGoodsDistributorModel.findOne({ _id: item.goods_id, distributorId: distributorId });
         if (goods && goods.quantity >= item.quantity) {
-            console.log(item.quantity)
 
             // Update quantity by checking version
             const updateGoods = await ManageGoodsDistributorModel
-            .findOneAndUpdate(
-                {
-                    _id: item.goods_id,
-                    distributorId: distributorId,
-                    quantity: { $gte: item.quantity },
-                },
-                {
-                    $inc: {
-                        quantity: -item.quantity,
-                        version: 1
-                    }
-                },
-                { new: true }
-            );
-            console.log('Checking optimistic locking...');
+                .findOneAndUpdate(
+                    {
+                        _id: item.goods_id,
+                        distributorId: distributorId,
+                        quantity: { $gte: item.quantity },
+                    },
+                    {
+                        $inc: {
+                            quantity: -item.quantity,
+                            version: 1
+                        }
+                    },
+                    { new: true }
+                );
+
             if (!updateGoods) {
-                console.log('Data has been updated by another user.');
                 return res.status(400).json({
                     error: 'Data has been updated by another user, please try again.'
                 });
@@ -216,12 +214,12 @@ exports.createGoodsDistributorCurrentRequest = asyncHandler(async (req, res) => 
 exports.updateGoodsDistributorCurrentRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id; // Get user ID
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const { status } = req.body;
-    console.log("Sending request to update status:", status, id);
+
     // Find the request to check if it is related to the user
     const request = await GoodsDistributorsCurrentRequestModel.findOne({ shortId: id });
-    console.log(request)
+
     // Check if the request exists
     if (!request) {
         return res.status(404).json({ msg: `There is no Request for this id: ${id}` });

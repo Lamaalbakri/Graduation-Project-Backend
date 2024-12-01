@@ -1,32 +1,32 @@
 const mongoose = require("mongoose");
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
-const nanoid = customAlphabet(alphabet, 12); // ID بطول 8 خانات 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 12);
 
 const retailerSchema = new mongoose.Schema(
   {
     shortId: {
       type: String,
-      unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
+      unique: true,
       default: () => `r${nanoid()}`,
-      immutable: true // اجعل القيمة غير قابلة للتعديل
+      immutable: true
     },
     full_name: {
       type: String,
       required: true,
-      trim: true // إزالة المسافات من البداية والنهاية
+      trim: true
     },
     email: {
       type: String,
       unique: true,
       required: true,
-      trim: true, // إزالة المسافات
-      lowercase: true // تحويل إلى أحرف صغيرة
+      trim: true,
+      lowercase: true
     },
     phone_number: {
       type: String,
       required: true,
-      trim: true // إزالة المسافات
+      trim: true
     },
     password: {
       type: String,
@@ -34,18 +34,18 @@ const retailerSchema = new mongoose.Schema(
     },
     userType: {
       type: String,
-      default: 'Retailer' // نوع المستخدم
+      default: 'Retailer'
     },
     addresses: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address' // الربط مع كولكشن العناوين
+        ref: 'Address'
       }
     ],
     distributorsList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Distributors' // الربط مع كولكشن الموردين
+        ref: 'Distributors'
       }
     ]
   }

@@ -6,14 +6,9 @@ const AddressModel = require('../models/addressSchema');
 // @route GET /api/v1/addresses/:id
 // @access Private
 exports.getAddressByUserId = asyncHandler(async (req, res) => {
-    //const { id } = req.params; // Get the user ID from the route parameters
     const userType = req.user.userType; // Get user type from the token
     const userId = req.user._id; // Get user ID from the token
 
-    // // Validate that the ID is provided
-    // if (!id || id.trim() === '') {
-    //     return res.status(400).json({ msg: 'ID is required.' });
-    // }
 
     // Find the address by ID, ensuring it belongs to the authenticated user
     const address = await AddressModel.findOne({ user_id: userId, user_type: userType });
@@ -67,7 +62,7 @@ exports.createAddress = asyncHandler(async (req, res) => {
     // Update the user's addresses list with the new address ID
     await UserModel.findByIdAndUpdate(
         userId,
-        { $addToSet: { addresses: newAddress._id } }, // استخدم $addToSet لتجنب التكرار
+        { $addToSet: { addresses: newAddress._id } }, // Use $addToSet to avoid duplication.
         { new: true }
     );
 

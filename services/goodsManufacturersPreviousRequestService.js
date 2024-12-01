@@ -9,7 +9,6 @@ exports.getGoodsManufacturerPreviousRequests = asyncHandler(async (req, res) => 
     // Filter requests based on userType
     const filter = userType === 'distributor' ? { distributorId: userId } : { manufacturerId: userId };
 
-
     const GoodsPreviousRequests = await GoodsManufacturersPreviousRequestModel.find(filter);
     res.status(200).json({ data: GoodsPreviousRequests });
 });
@@ -55,7 +54,7 @@ exports.getGoodsManufacturerPreviousRequestById = asyncHandler(async (req, res) 
 
 exports.getGoodsManufacturerPreviousRequestByMSlug = asyncHandler(async (req, res) => {
     const { slug } = req.params;//take  slug from / :slug
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const userId = req.user._id; // Get user ID
 
     const request = await GoodsManufacturersPreviousRequestModel.findOne({ slug });
@@ -78,7 +77,7 @@ exports.getGoodsManufacturerPreviousRequestByMSlug = asyncHandler(async (req, re
 
 exports.getGoodsManufacturerPreviousRequestByName = asyncHandler(async (req, res) => {
     const { distributorName } = req.params;
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const userId = req.user._id; // Get user ID
 
     const requests = await GoodsManufacturersPreviousRequestModel.find({ distributorName: new RegExp(`^${distributorName}$`, "i") });
@@ -130,7 +129,6 @@ exports.createGoodsManufacturerPreviousRequest = asyncHandler(async (req, res) =
 
 
     if (!shortId || !_id) {
-        console.log('here the error')
         return res.status(400).json({ error: "shortId and _id are  Missing" });
     }
 
@@ -161,7 +159,6 @@ exports.createGoodsManufacturerPreviousRequest = asyncHandler(async (req, res) =
     };
 
     const goodsPreviousRequest = await GoodsManufacturersPreviousRequestModel.create(goodsRequestData);
-    console.log('done here previous serves')
     res.status(201).json({ data: goodsPreviousRequest });
 });
 
@@ -169,7 +166,7 @@ exports.createGoodsManufacturerPreviousRequest = asyncHandler(async (req, res) =
 exports.updateGoodsManufacturerPreviousRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id; // Get user ID
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const { status } = req.body;
 
     const request = await GoodsManufacturersPreviousRequestModel.findOne({ shortId: id });

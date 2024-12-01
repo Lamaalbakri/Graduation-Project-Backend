@@ -23,17 +23,12 @@ function verifyToken(req, res, next) {
         if (err) return res.status(500).send('Failed to authenticate token.'); //Token is invalid or expired
 
         try {
-            // console.log("User type:", decoded.userType);
-            // console.log("Decoded ID:", decoded.id);
-
             // Get the appropriate model based on userType
             const UserModel = getModelByUserType(decoded.userType);
-            // console.log("UserModel after calling getModelByUserType:", UserModel);
-
             // Check if user exists in the database
             try {
-                const currentUser = await UserModel.findById(decoded.id); // البحث عن المستخدم في قاعدة البيانات
-                // console.log("Current user:", currentUser);
+                const currentUser = await UserModel.findById(decoded.id);
+
 
                 if (!currentUser) {
                     return res.status(401).send('The user that belongs to this token does not exist anymore.');
@@ -44,18 +39,15 @@ function verifyToken(req, res, next) {
                 next();
 
             } catch (error) {
-                console.error("Error in findById:", error);
                 return res.status(500).send('Error fetching user: ' + error.message);
             }
 
         } catch (error) {
-            return res.status(500).send('Error fetching user.'); //  حدث خطأ أثناء جلب بيانات المستخدم من قاعدة البيانات
+            return res.status(500).send('Error fetching user.');
         }
-        //check if user change his password after token created
     });
 }
 
-//ex: [manufacturer] 
 function allowedTo(...roles) {
     return (req, res, next) => {
         if (!roles.includes(req.user.userType)) {
@@ -68,7 +60,6 @@ function allowedTo(...roles) {
 function getJwtSecret() {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-        console.error("Missing JWT Secret");
         process.exit(1);
     }
 

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');//import mongoose 
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
-const nanoid = customAlphabet(alphabet, 8); // ID بطول 8 خانات 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 8);
 
 const TransporterPreviousRequestSchema = new mongoose.Schema(
     {
@@ -64,13 +64,13 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
             min: 0,
         },
         estimated_delivery_date: {
-            type: [Date], 
+            type: [Date],
             required: true
         },
         actual_delivery_date: {
             type: Date,
             default: null,
-            required: function() {
+            required: function () {
                 return this.status === 'delivered';
             }
         },
@@ -96,7 +96,7 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
                 type: String,
                 trim: true,
             },
-            neighborhood: { 
+            neighborhood: {
                 type: String,
                 required: true,
                 trim: true,
@@ -143,7 +143,7 @@ const TransporterPreviousRequestSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-        contract_id: { 
+        contract_id: {
             type: String,
             trim: true,
         },

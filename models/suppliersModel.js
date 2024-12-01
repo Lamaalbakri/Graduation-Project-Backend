@@ -1,7 +1,7 @@
 const mongoose = require('mongoose'); //import mongoose 
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
-const nanoid = customAlphabet(alphabet, 12); // ID بطول 8 خانات 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 12);
 
 const supplierSchema = new mongoose.Schema({
     shortId: {
@@ -13,14 +13,14 @@ const supplierSchema = new mongoose.Schema({
     full_name: {
         type: String,
         required: true,
-        trim: true // إزالة المسافات الزائدة
+        trim: true
     },
     email: {
         type: String,
         unique: true,
         required: true,
-        trim: true, // إزالة المسافات الزائدة
-        lowercase: true // تحويل البريد الإلكتروني إلى حروف صغيرة
+        trim: true,
+        lowercase: true
     },
     phone_number: {
         type: String,
@@ -34,12 +34,12 @@ const supplierSchema = new mongoose.Schema({
     userType: {
         type: String,
         default: 'Supplier',
-        trim: true // إزالة المسافات الزائدة
+        trim: true
     },
     category: {
         type: String,
         default: "",
-        trim: true // إزالة المسافات الزائدة
+        trim: true
     },
     rawMaterialList: [
         {
@@ -55,7 +55,7 @@ const supplierSchema = new mongoose.Schema({
     ]
 },
     {
-        timestamps: true // إضافة التواريخ createdAt و updatedAt
+        timestamps: true
     });
 
 

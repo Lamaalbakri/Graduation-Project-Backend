@@ -3,9 +3,6 @@ const asyncHandler = require('express-async-handler')
 const Supplier = require('../models/suppliersModel')
 const Manufacturer = require('../models/manufacturersModel');
 
-/* in each function i used try catch block. it is good for error handling because we can send different types of
-error like 400, 401. 404,500 etc. each error has particular meaning and it is good to handle in frontend. we can know looking at this status what kind of error it is. only in getMaterials and getMaterialById try block is not used. we can use it here too. i have also received data in three controllers below in body. body is considered more secure coz params are seen in address bar*/
-
 
 // @desc get MaterialForListOfSupplier
 // @route Post /api/v1/ManageRawMaterial
@@ -21,10 +18,9 @@ exports.getMaterialForListOfSupplier = asyncHandler(async (req, res) => {
     .select('suppliersList')
     .populate({
       path: 'suppliersList',
-      select: 'full_name _id' 
+      select: 'full_name _id'
     });
 
-  console.log(manufacturer);
   if (!manufacturer) {
     res.status(404);
     throw new Error('Manufacturer not found');
@@ -114,7 +110,6 @@ exports.getMaterialByNameOrId = async (req, res) => {
 
     res.status(200).json({ success: true, data: material });
   } catch (error) {
-    console.error('Error fetching material:', error);
     res.status(500).json({ message: 'Error fetching material', error });
   }
 };
@@ -149,7 +144,6 @@ exports.createMaterial = async (req, res) => {
     res.status(201).json({ success: true, message: 'Raw material added successfully', data: material });
 
   } catch (error) {
-    console.error('Error adding material:', error);
     res.status(500).json({ message: 'Error adding material', error });
   }
 };
@@ -178,7 +172,6 @@ exports.updateMaterial = async (req, res) => {
     res.status(200).json({ success: true, data: updateMaterial });
 
   } catch (error) {
-    console.error('Error updating material:', error);
     res.status(500).json({ message: 'Error adding material', error });
   }
 };

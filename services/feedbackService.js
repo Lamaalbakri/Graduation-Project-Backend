@@ -28,7 +28,6 @@ exports.getFeedback = asyncHandler(async (req, res) => {
 exports.createFeedback = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const userType = req.user.userType;// Get user type from the token
-
   const newFeedback = await FeedbackModel.create(req.body);
 
 

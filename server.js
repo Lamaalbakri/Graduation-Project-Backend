@@ -4,7 +4,6 @@ const morgan = require('morgan');//import morgan middleware for HTTP request
 const cors = require('cors');
 const cookieParser = require('cookie-parser'); // import cookie-parser library
 
-//add
 // Load variables from config.env file
 dotenv.config({ path: 'config.env' });
 const dbConnection = require('./config/database');

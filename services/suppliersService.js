@@ -21,14 +21,10 @@ const registerSupplier = async (data) => {
     category
   });
 
-  // await newSupplier.save();
-  // return { message: "Supplier registered successfully!" };
-  //lamya
   try {
     // Attempt to save the new Supplier
     await newSupplier.save();
 
-    // add lama
     // Create JWT token
     const token = createToken(newSupplier._id, 'supplier');
     // Check if token creation was successful
@@ -65,7 +61,6 @@ const searchSuppliers = async (req, res) => {
     const suppliers = await SupplierModel.find(searchQuery);
     res.status(200).json({ data: suppliers });
   } catch (error) {
-    console.log("error: ", error);
     res.status(500).json({ error: `Search failed: ${error.message}` });
   }
 };

@@ -12,15 +12,12 @@ const asyncHandler = require('express-async-handler')
 // Login method
 async function login(req, res) {
   const { email, password, userType } = req.body;
-  console.log(`${userType} login successfully`);
 
   try {
     const UserModel = getModelByUserType(userType);
-    console.log('User model retrieved successfully');
 
     // Find the user in the database
     const user = await UserModel.findOne({ email });
-    // console.log('User found in the database');
 
     if (!user) {
       return res.status(404).json({ message: 'No user found with this email and user type.' });
@@ -28,7 +25,6 @@ async function login(req, res) {
 
     // When checking the password during login
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('Password comparison done');
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Incorrect password or email.' });
@@ -38,20 +34,19 @@ async function login(req, res) {
     const token = createToken(user._id, userType);
 
     res.cookie('token', token, {
-      httpOnly: true,       // يجعل الكوكي غير قابل للقراءة من جانب العميل
-      secure: true,         // الكوكي يُرسل فقط عبر HTTPS
-      sameSite: 'Strict',   // يحمي من هجمات CSRF
-      maxAge: 7200000       // مدة الصلاحية للكوكي
+      httpOnly: true,       // Makes the cookie unreadable by the client.
+      secure: true,         // Cookies are only sent over HTTPS.
+      sameSite: 'Strict',   // Protects against CSRF attacks
+      maxAge: 7200000       // cookie shelf life
     });
 
-    // إرجاع معلومات إضافية مع استجابة النجاح
+    // Return additional information with success response.
     return res.status(200).json({
       message: 'Login successful',
-      userId: user._id,          // يمكنك إرجاع ID المستخدم
-      userRole: userType         // إرجاع نوع المستخدم
+      userId: user._id,
+      userRole: userType
     });
   } catch (error) {
-    console.error('Error during login:', error);
     return res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 }
@@ -60,8 +55,6 @@ async function login(req, res) {
 async function register(req, res) {
   const { userType } = req.body;
   const { category } = req.body;
-  console.log(`Registering ${userType}`);
-  console.log(`Registering ${category}`);
 
   try {
     let result;
@@ -87,7 +80,6 @@ async function register(req, res) {
 
     res.status(201).json(result);
   } catch (error) {
-    console.error("Error in registration:", error);
     res.status(500).json({ error: error.message });
   }
 }
@@ -95,26 +87,18 @@ async function register(req, res) {
 
 const getOne = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { userType } = req.query; // نوع المستخدم يمكن أن يتم تمريره في الـ query
+  const { userType } = req.query;
 
   try {
-    // احصل على الموديل بناءً على نوع المستخدم
     const UserModel = getModelByUserType(userType);
-    console.log(`Retrieved model for userType: ${userType}`);
-
-    // ابحث عن المستخدم في قاعدة البيانات بناءً على ID
     const document = await UserModel.findById(id);
-    console.log(`User document found with ID: ${id}`);
 
     if (!document) {
       return res.status(404).json({ error: "No document found for this id." });
     }
 
-    // ارجع بيانات المستخدم
-    console.log('Sending user data:', document);
     res.status(200).json({ data: document });
   } catch (error) {
-    console.error('Error during fetching user:', error);
     return res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 });
@@ -123,26 +107,19 @@ const getOne = asyncHandler(async (req, res, next) => {
 // bring all the supplier list in the view page 
 const getOneWithSupplier = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { userType } = req.query; // نوع المستخدم يمكن أن يتم تمريره في الـ query
+  const { userType } = req.query;
 
   try {
-    // احصل على الموديل بناءً على نوع المستخدم
     const UserModel = getModelByUserType(userType);
-    console.log(`Retrieved model for userType: ${userType}`);
 
-    // ابحث عن المستخدم في قاعدة البيانات بناءً على ID
     const document = await UserModel.findById(id).populate('suppliersList');
-    console.log(`User document found with ID: ${id}`);
 
     if (!document) {
       return res.status(404).json({ error: "No document found for this id." });
     }
 
-    // ارجع بيانات المستخدم
-    console.log('Sending user data:', document);
     res.status(200).json({ data: document });
   } catch (error) {
-    console.error('Error during fetching user:', error);
     return res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 });
@@ -155,19 +132,15 @@ const getOneWithManufacturer = asyncHandler(async (req, res, next) => {
 
   try {
     const UserModel = getModelByUserType(userType);
-    console.log(`Retrieved model for userType: ${userType}`);
 
     const document = await UserModel.findById(id).populate('manufacturersList');
-    console.log(`User document found with ID: ${id}`);
 
     if (!document) {
       return res.status(404).json({ error: "No document found for this id." });
     }
 
-    console.log('Sending user data:', document);
     res.status(200).json({ data: document });
   } catch (error) {
-    console.error('Error during fetching user:', error);
     return res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 });
@@ -179,26 +152,22 @@ const getMeWithDistributor = asyncHandler(async (req, res, next) => {
 
   try {
     const UserModel = getModelByUserType(userType);
-    console.log(`Retrieved model for userType: ${userType}`);
 
     const document = await UserModel.findById(id).populate('distributorsList');
-    console.log(`User document found with ID: ${id}`);
 
     if (!document) {
       return res.status(404).json({ error: "No document found for this id." });
     }
 
-    console.log('Sending user data:', document);
     res.status(200).json({ data: document });
   } catch (error) {
-    console.error('Error during fetching user:', error);
     return res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 });
 
 const getLoggedUserData = asyncHandler(async (req, res, next) => {
   req.params.id = req.user._id;
-  req.query.userType = req.user.userType; 
+  req.query.userType = req.user.userType;
   next();
 });
 
@@ -206,9 +175,6 @@ const getLoggedUserData = asyncHandler(async (req, res, next) => {
 const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { userType } = req.query;
-  console.log("Received userType:", userType);
-  console.log('Updating user with ID:', id);
-  console.log('Update data:', req.body);
 
   try {
     const UserModel = getModelByUserType(userType);
@@ -221,9 +187,8 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({ message: `${userType} updated successfully.`, data: updatedUser });
-    console.log(`${userType} updated successfully.`, updatedUser);
+
   } catch (error) {
-    console.error('Error updating:', error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 });

@@ -1,8 +1,6 @@
 const TransporterCurrentRequestModel = require('../models/transporterCurrentRequestModel');
 const RawMaterialCurrentRequestModel = require('../models/rawMaterialCurrentRequestModel');
-const RawMaterialPreviousRequestModel = require('../models/rawMaterialPreviousRequestModel');
 const { createRawMaterialPreviousRequest } = require('./rowMaterialPreviousRequestService');
-const { deleteRawMaterialCurrentRequest } = require('./rowMaterialCurrentRequestService');
 const GoodsManufacturersCurrentRequestModel = require('../models/goodsManufacturersCurrentRequestModel');
 const GoodsDistributorsCurrentRequestModel = require('../models/goodsDistributorsCurrentRequestModel');
 
@@ -39,7 +37,6 @@ exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
 
     const userId = req.user._id; // senderId
     const userType = req.user.userType; // sender_type
-
     const request_id = req.body.request_id;
     const receiver_id = req.body.receiver_id;
     const receiver_type = req.body.receiver_type;
@@ -85,7 +82,6 @@ exports.createTransporterCurrentRequest = asyncHandler(async (req, res) => {
 
         res.status(201).json({ data: TransporterCurrentRequest });
     } catch (error) {
-        console.error('Error creating transport request:', error);
         return res.status(400).json({ msg: 'Validation Error', errors: error.errors });
     }
 
@@ -246,13 +242,6 @@ async function updateSenderStatus(request, status) {
             },
             { new: true }
         );
-
-        //2) create previous request to delete current request
-
-        // Call the function to create the previous request
-
-        //3)delete current request
-
     }
 
     if (!result) {
@@ -287,38 +276,3 @@ exports.deleteTransporterCurrentRequest = asyncHandler(async (req, res) => {
 
     res.status(204).send();
 });
-
-const getPreviousRequestData = (result, userType) => {
-    if (userType === 'supplier') {
-        return {
-            _id: result._id,
-            shortId: result.shortId,
-            supplierId: result.supplierId,
-            supplierName: result.supplierName,
-            manufacturerName: result.manufacturerName,
-            manufacturerId: result.manufacturerId,
-            supplyingRawMaterials: result.supplyingRawMaterials,
-            subtotal_items: result.subtotal_items,
-            shipping_cost: result.shipping_cost,
-            total_price: result.total_price,
-            payment_method: result.payment_method,
-            status: 'delivered',  // Adjust as needed
-            arrivalAddress: result.arrivalAddress,
-            departureAddress: result.departureAddress,
-            transporterId: result.transporterId,
-            transporterName: result.transporterName,
-            estimated_delivery_date: result.estimated_delivery_date,
-            actual_delivery_date: result.actual_delivery_date,
-            notes: result.notes,
-            tracking_number: result.tracking_number,
-            transportRequest_id: result.transportRequest_id,
-            contract_id: result.contract_id,
-        };
-    }
-    //  else if(userType === 'manufacturer') {
-    // //   // Handle other user types here, returning a different structure if needed
-    // //   return {
-
-    // //   };
-    // }
-};

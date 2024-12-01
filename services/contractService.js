@@ -2,8 +2,8 @@ require("dotenv").config();
 const mongoose = require('mongoose');
 const { ethers } = require('ethers');
 const asyncHandler = require('express-async-handler');
-const contractABI = require('../artifacts/contracts/SupplyChainContract.sol/SupplyChainContract.json').abi; // تأكد من تحميل ABI للعقد
-const contractAddress = process.env.CONTRACT_ADDRESS;// عنوان العقد المنشأ
+const contractABI = require('../artifacts/contracts/SupplyChainContract.sol/SupplyChainContract.json').abi; // Make sure to download the ABI for the contract.
+const contractAddress = process.env.CONTRACT_ADDRESS;// Title of the contract originating
 const ContractModel = require('../models/contractModel');
 const TransporterCurrentRequestModel = require('../models/transporterCurrentRequestModel');
 const RawMaterialCurrentRequestModel = require('../models/rawMaterialCurrentRequestModel');
@@ -11,19 +11,17 @@ const GoodsDistributorsCurrentRequestModel = require('../models/goodsDistributor
 const GoodsManufacturersCurrentRequestModel = require('../models/goodsManufacturersCurrentRequestModel');
 const { getModelByUserType } = require("../models/userModel");
 
-// إعداد مزود الشبكة لشبكة Sepolia عبر Alchemy
+// Setting up a Sepolia Network Provider via Alchemy
 const provider = new ethers.JsonRpcProvider(`https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`);
 const wallet = new ethers.Wallet(process.env.SEPOLIA_PRIVATE_KEY, provider);
-// إعداد العقد
+// Contract preparation
 const supplyChainContract = new ethers.Contract(contractAddress, contractABI, wallet);
 
-// دالة لإنشاء عقد جديد
-
+// Function to create a new contract
 exports.createContract = asyncHandler(async (req, res) => {
     try {
         const { transportOId: extractedTransportOrderId, purchaseOId: extractedPurchaseOrderId } = req.body;
-        console.log(extractedTransportOrderId, extractedPurchaseOrderId)
-        // الخطوة 1: البحث في TransportCurrentRequest
+        //Step 1: Find and collect all the data that will be stored in the contract.
         const transportRequest = await TransporterCurrentRequestModel.findOne({ shortId: extractedTransportOrderId });
 
         if (!transportRequest) {
@@ -44,17 +42,13 @@ exports.createContract = asyncHandler(async (req, res) => {
             estimated_delivery_date//estimatedDeliveryTimes
         } = transportRequest;
 
-        console.log(transportRequest, sender_type)
-        // استخدام الدالة لاختيار الموديل المناسب بناءً على `sender_type` و `receiver_type`
         const sellerModel = getModelByUserType(sender_type);
-
         const buyerModel = getModelByUserType(receiver_type);
         const transporterModel = getModelByUserType('transporter');
-        // استعلام للحصول على معلومات المرسل والمستقبل
         const [sellerInfo, buyerInfo, transporterInfo] = await Promise.all([
-            sellerModel.findOne({ _id: senderId }, "shortId full_name"), // استعلام للمرسل
-            buyerModel.findOne({ _id: receiver_id }, "shortId full_name"), // استعلام للمستقبل
-            transporterModel.findOne({ _id: collectionTransporterId }, "shortId full_name"), // استعلام للناقل
+            sellerModel.findOne({ _id: senderId }, "shortId full_name"),
+            buyerModel.findOne({ _id: receiver_id }, "shortId full_name"),
+            transporterModel.findOne({ _id: collectionTransporterId }, "shortId full_name"),
         ]);
 
         if (!sellerInfo || !buyerInfo || !transporterInfo) {
@@ -70,8 +64,6 @@ exports.createContract = asyncHandler(async (req, res) => {
         const extractedTransporterName = transporterInfo.full_name;
         const extractedTransporterId = transporterInfo.shortId;
 
-        console.log(extractedSellerName, extractedSellerShortId, sender_type)
-        // تحديد الكولكشن بناءً على sender_type
         let requestData, extractedData;
         switch (sender_type) {
             case "supplier":
@@ -80,12 +72,12 @@ exports.createContract = asyncHandler(async (req, res) => {
                     return res.status(404).json({ message: "Purchase request not found in RawMaterialCurrentRequestModel." });
                 }
                 const supplyingItem = requestData.supplyingRawMaterials.map(item => {
-                    // استخراج البيانات المطلوبة من كل عنصر
+
                     const options = item.options.map(option => `${option.optionType} ${option.values}`).join(", ");
                     return {
-                        itemName: item.rawMaterial_name,  // اسم المادة الخام
-                        quantity: item.quantity,          // الكمية
-                        options: options,                 // الخيارات (مثل: سمك، لون)
+                        itemName: item.rawMaterial_name,
+                        quantity: item.quantity,
+                        options: options,
                     };
                 });
 
@@ -137,9 +129,8 @@ exports.createContract = asyncHandler(async (req, res) => {
             default:
                 return res.status(400).json({ message: "Invalid sender type." });
         }
-        console.log("pass here")
 
-        // // الخطوة 2: تنسيق البيانات
+        //Step 2: Format the data
         const transportType = temperature === "Refrigerated Delivery" ? 1 : 0;
         const weight = collectionWeight === "3 to 7 tons" ? 0 : collectionWeight === "7 to 15 tons" ? 1 : 2;
 
@@ -164,10 +155,6 @@ exports.createContract = asyncHandler(async (req, res) => {
         const quantities = extractedData.extractedItems.map((item) => item.quantity);
         const options = extractedData.extractedItems.map((item) => item.options);
 
-        console.log("Item Names:", itemNames);
-        console.log("Quantities:", quantities);
-        console.log("Options:", options);
-
         const tx = await supplyChainContract.createContract(
             purchaseOrderId,
             transportOrderId,
@@ -189,23 +176,18 @@ exports.createContract = asyncHandler(async (req, res) => {
             weight
         );
 
-        // // الانتظار حتى يتم تأكيد المعاملة
+        // Wait for the transaction to be confirmed
         const receipt = await tx.wait();
-        console.log(receipt)
         const newContractCounter = Number(receipt.logs[0].args[0]);
 
-        // // تجهيز قائمة العناصر (items)
         const items = itemNames.map((name, index) => ({
             itemName: ethers.decodeBytes32String(name),
             quantity: quantities[index],
             options: options[index].split(",").map(opt => opt.trim()),
         }));
-        console.log(items)
 
         const estimatedDates = estimatedDeliveryTimes.map(time => new Date(time * 1000));
 
-
-        // إعداد بيانات العقد للتخزين
         const contractData = {
             purchaseOrderId: ethers.decodeBytes32String(purchaseOrderId),
             transportOrderId: ethers.decodeBytes32String(transportOrderId),
@@ -228,7 +210,6 @@ exports.createContract = asyncHandler(async (req, res) => {
             transactionHash: receipt.hash,
         };
 
-        console.log(contractData)
         const result = await ContractModel.create(contractData);
         res.status(200).json({ message: "Contract created successfully", data: result });
     } catch (error) {
@@ -240,7 +221,6 @@ exports.getContract = asyncHandler(async (req, res) => {
     try {
         const userId = req.user.shortId;
         const orderId = req.params.orderId;
-        console.log(orderId); // تحقق من القيمة المرسلة
 
         const contract = await ContractModel.findOne({
             $or: [
@@ -254,17 +234,14 @@ exports.getContract = asyncHandler(async (req, res) => {
         }
         const contractCounter = contract.contractCounter;
 
-        // استرجاع عنوان الشركة من العقد الذكي
         const companyAddress = await supplyChainContract.companyAddress();
-        console.log(companyAddress)
-        // استرجاع العقد من العقد الذكي باستخدام companyAddress و contractCounter
+
         const smartContractData = await supplyChainContract.getContract(companyAddress, contractCounter);
 
-        // تحديد نوع النقل والوزن استنادًا إلى القيم المخزنة في العقد الذكي
-        const transportType = Number(smartContractData.transportType); // إذا كانت 0 أو 1
-        const weight = Number(smartContractData.weight); // إذا كانت 0 أو 1 أو 2
 
-        // تحديد خيارات النقل والوزن بناءً على القيم المسترجعة
+        const transportType = Number(smartContractData.transportType);
+        const weight = Number(smartContractData.weight);
+
         const transportTypeText = transportType === 0 ? "Regular Delivery" : "Refrigerated Delivery";
         const weightText = weight === 0 ? "3 to 7 tons" : weight === 1 ? "7 to 15 tons" : "over 15 tons";
 
@@ -281,18 +258,18 @@ exports.getContract = asyncHandler(async (req, res) => {
             totalBuyerPayment: Number(smartContractData.totalBuyerPayment) / 100,
             totalTransportPayment: Number(smartContractData.totalTransportPayment) / 100,
             estimatedDeliveryTimes: smartContractData.estimatedDeliveryTimes.map(time =>
-                new Date(Number(time) * 1000).toISOString() // إرسال التاريخ بتنسيق ISO 8601
+                new Date(Number(time) * 1000).toISOString()
             ),
             actualDeliveryTime: smartContractData.actualDeliveryTime > 0
                 ? new Date(Number(smartContractData.actualDeliveryTime) * 1000).toLocaleDateString("en-US")
-                : "Not delivered yet", // عرض null إذا لم يتم تعيين الوقت
+                : "Not delivered yet",
             purchaseOrderStatus: Number(smartContractData.purchaseOrderStatus) === 0
                 ? "inProgress"
-                : "delivered", // تحويل الحالة إلى نصوص
+                : "delivered",
             sellerAddress: smartContractData.sellerAddress,
             buyerAddress: smartContractData.buyerAddress,
-            transportType: transportTypeText,  // إضافة نوع النقل
-            weight: weightText, // إضافة الوزن
+            transportType: transportTypeText,
+            weight: weightText,
             items: smartContractData.items.map(item => ({
                 itemName: ethers.decodeBytes32String(item.itemName),
                 quantity: Number(item.quantity),
@@ -302,7 +279,7 @@ exports.getContract = asyncHandler(async (req, res) => {
             blockNumber: contract.blockNumber
         };
 
-        // إعادة البيانات إلى العميل
+
         res.status(200).json({
             message: "Contract fetched successfully",
             data: formattedContract
@@ -331,24 +308,18 @@ exports.updateContract = asyncHandler(async (req, res) => {
         }
         const contractCounter = contract.contractCounter;
         console.log(contractCounter);
-        // استدعاء الوقت الحالي (new Date) مرة واحدة
+
         const currentDate = new Date();
 
-        // تحويل الوقت إلى uint (عدد الثواني منذ بداية Epoch)
+
         const currentTimeInSeconds = Math.floor(currentDate.getTime() / 1000);
-
         const companyAddress = await supplyChainContract.companyAddress();
-
-        // استرجاع عنوان الشركة من العقد الذكي
         const tx = await supplyChainContract.markContractAsDelivered(companyAddress, contractCounter, currentTimeInSeconds);
 
-        // انتظار تأكيد المعاملة
         const receipt = await tx.wait();
 
-        // استرجاع المعلومات الجديدة من العقد الذكي
         const smartContractData = await supplyChainContract.getContract(companyAddress, contractCounter);
 
-        // تحديث العقد في MongoDB
         const updatedContract = await ContractModel.findOneAndUpdate(
             {
                 $or: [
@@ -362,10 +333,9 @@ exports.updateContract = asyncHandler(async (req, res) => {
                 blockNumber: receipt.blockNumber,
                 transactionHash: receipt.hash
             },
-            { new: true } // استرجاع العقد المحدث
+            { new: true }
         );
 
-        // إعادة العقد المحدث إلى العميل
         res.status(200).json({
             message: "Contract updated to delivered successfully",
             data: updatedContract

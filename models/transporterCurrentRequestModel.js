@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');//import mongoose 
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
-const nanoid = customAlphabet(alphabet, 8); // ID بطول 8 خانات 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 8);
 
 const TransporterCurrentRequestSchema = new mongoose.Schema(
     {

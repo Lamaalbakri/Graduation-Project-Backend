@@ -21,16 +21,10 @@ const registerManufacturer = async (data) => {
     category
   });
 
-  // await newManufacturer.save();
-  // return { message: "Manufacturer registered successfully!" };
-
-  //lamya
   try {
     // Attempt to save the new manufacturer
     await newManufacturer.save();
-    // res.status(201).json({ message: "manufacturer registered successfully!" });
 
-    // add lama
     // Create JWT token
     const token = createToken(newManufacturer._id, 'manufacturer');
 
@@ -66,7 +60,7 @@ const searchManufacturers = async (req, res) => {
     const manufacturers = await ManufacturerModel.find(searchQuery);
     res.status(200).json({ data: manufacturers });
   } catch (error) {
-    console.log("error: ", error);
+
     res.status(500).json({ error: `Search failed: ${error.message}` });
   }
 };

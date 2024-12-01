@@ -1,33 +1,28 @@
 const mongoose = require('mongoose');
 
 const ShoppingBasketModel = new mongoose.Schema({
-    // معرف البائع
     sellerId: {
-        type: mongoose.Schema.Types.ObjectId, // إذا كنت تستخدم ObjectId
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        trim: true, // Assuming there is a User collection for sellers
+        trim: true,
     },
-    // معرف المشتري
     buyerId: {
-        type: mongoose.Schema.Types.ObjectId, // إذا كنت تستخدم ObjectId
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        trim: true, // Assuming there is a User collection for buyers
+        trim: true,
     },
-    // اسم البائع
     sellerName: {
         type: String,
         required: true,
         trim: true,
         lowercase: true,
     },
-    // اسم المشتري
     buyerName: {
         type: String,
         required: true,
         trim: true,
         lowercase: true,
     },
-    // المواد الخام المضافة إلى السلة
     ShoppingBasketItems: [{
         item_id: {
             type: mongoose.Schema.ObjectId,
@@ -39,8 +34,7 @@ const ShoppingBasketModel = new mongoose.Schema({
             trim: true,
         },
         image: {
-            type: String, // يمكن تغييره إلى ObjectId إذا كنت تستخدم GridFS لتخزين الصور
-            // required: [true, "Product Image is required"],
+            type: String,
         },
         quantity: {
             type: Number,
@@ -52,12 +46,12 @@ const ShoppingBasketModel = new mongoose.Schema({
             required: true,
             min: 0,
         },
-        unit: { // وحدة القياس
+        unit: {
             type: String,
             required: true,
             trim: true,
         },
-        options: [ // الخيارات المرتبطة بالمادة الخام
+        options: [
             {
                 optionType: {
                     type: String,
@@ -70,19 +64,16 @@ const ShoppingBasketModel = new mongoose.Schema({
             }
         ],
     }],
-    // المجموع الفرعي لكل المواد في السلة
     subtotal_items: {
         type: Number,
         required: true,
         min: 0,
     },
-    // تكلفة الشحن
     shipping_cost: {
         type: Number,
         required: true,
         min: 0,
     },
-    // السعر الإجمالي للسلة بعد إضافة الشحن
     total_price: {
         type: Number,
         required: true,

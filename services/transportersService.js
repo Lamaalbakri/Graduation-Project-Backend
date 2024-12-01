@@ -22,7 +22,7 @@ const registerTransporter = async (data) => {
     password: hashedPassword,
     userType
   });
- 
+
   try {
     // Attempt to save the new transporter
     await newTransporter.save();
@@ -49,13 +49,11 @@ const getTransporters = asyncHandler(async (req, res) => {
     const transporters = await TransporterModel.find({});
 
     if (!transporters.length) {
-      console.log("No transporters found.");
       return res.status(404).json({ message: "No transporters found" });
     }
 
     res.status(200).json({ data: transporters });
   } catch (error) {
-    console.error("Error fetching transporters:", error);
     res.status(500).json({ message: "Server error fetching transporters." });
   }
 });

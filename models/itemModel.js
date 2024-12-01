@@ -8,9 +8,9 @@ function getItemModelByUserType(userType) {
         case 'manufacturer':
             return RawMaterialModel;
         case 'distributor':
-           return ManufacturedGoodsModel;
+            return ManufacturedGoodsModel;
         case 'retailer':
-           return DistributoredGoodsModel;
+            return DistributoredGoodsModel;
         default:
             throw new Error('Invalid user type');
     }

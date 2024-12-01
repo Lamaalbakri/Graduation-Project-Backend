@@ -20,17 +20,12 @@ const registerRetailer = async (data) => {
     userType
   });
 
-  //lamya
   try {
     // Attempt to save the new retailer
     await newRetailer.save();
-    // res.status(201).json({ message: "Retailer registered successfully!" });
 
-    // add lama
     // Create JWT token
     const token = createToken(newRetailer._id, 'retailer');
-    // const token = jwt.sign({ id: newRetailer._id, userType: 'retailer' },
-    //   getJwtSecret(), { expiresIn: process.env.JWT_EXPIRE_TIME });
 
     // Check if token creation was successful
     if (!token) {

@@ -1,61 +1,61 @@
 const mongoose = require("mongoose");
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
-const nanoid = customAlphabet(alphabet, 12); // ID بطول 8 خانات 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 12);
 
 const manufacturerSchema = new mongoose.Schema({
   shortId: {
     type: String,
-    unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
+    unique: true,
     default: () => `m${nanoid()}`,
-    immutable: true // اجعل القيمة غير قابلة للتعديل
+    immutable: true
   },
   full_name: {
     type: String,
     required: true,
-    trim: true, // إزالة المسافات من البداية والنهاية
+    trim: true,
   },
   email: {
     type: String,
     unique: true,
     required: true,
-    trim: true, // إزالة المسافات من البداية والنهاية
-    lowercase: true // تحويل البريد الإلكتروني إلى أحرف صغيرة
+    trim: true,
+    lowercase: true
   },
   phone_number: {
     type: String,
     required: true,
-    trim: true // إزالة المسافات من البداية والنهاية
+    trim: true
   },
   password: {
     type: String,
-    required: true // يمكن هنا تجنب `trim` نظرًا لأن كلمة المرور قد تتطلب مسافات
+    required: true
   },
   userType: {
     type: String,
-    default: 'Manufacturer' // نوع المستخدم
+    default: 'Manufacturer'
   },
   category: {
     type: String,
-    trim: true, // إزالة المسافات من البداية والنهاية
-    default: '' // القيمة الافتراضية لتكون حقلًا اختياريًا
+    trim: true,
+    default: ''
   },
   suppliersList: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Suppliers' // إشارة إلى الموردين
+      ref: 'Suppliers'
     }
   ],
   manufacturerGoodsList: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Manage-Goods-Manufacturers' // إشارة إلى قائمة البضائع المصنعة
+      ref: 'Manage-Goods-Manufacturers'
     }
   ],
   addresses: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Address' // إشارة إلى عناوين المصنع
+      ref: 'Address'
     }
   ]
 });

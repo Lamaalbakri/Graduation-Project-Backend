@@ -55,7 +55,7 @@ exports.getGoodsDistributorPreviousRequestById = asyncHandler(async (req, res) =
 
 exports.getGoodsDistributorPreviousRequestByMSlug = asyncHandler(async (req, res) => {
     const { slug } = req.params;//take  slug from / :slug
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const userId = req.user._id; // Get user ID
 
     const request = await GoodsDistributorsPreviousRequestModel.findOne({ slug });
@@ -78,7 +78,7 @@ exports.getGoodsDistributorPreviousRequestByMSlug = asyncHandler(async (req, res
 
 exports.getGoodsDistributorPreviousRequestByName = asyncHandler(async (req, res) => {
     const { distributorName } = req.params;
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const userId = req.user._id; // Get user ID
 
     const requests = await GoodsDistributorsPreviousRequestModel.find({ distributorName: new RegExp(`^${distributorName}$`, "i") });
@@ -130,7 +130,6 @@ exports.createGoodsDistributorPreviousRequest = asyncHandler(async (req, res) =>
 
 
     if (!shortId || !_id) {
-        console.log('here the error')
         return res.status(400).json({ error: "shortId and _id are  Missing" });
     }
 
@@ -161,7 +160,6 @@ exports.createGoodsDistributorPreviousRequest = asyncHandler(async (req, res) =>
     };
 
     const goodsPreviousRequest = await GoodsDistributorsPreviousRequestModel.create(goodsRequestData);
-    console.log('done here previous serves')
     res.status(201).json({ data: goodsPreviousRequest });
 });
 
@@ -169,7 +167,7 @@ exports.createGoodsDistributorPreviousRequest = asyncHandler(async (req, res) =>
 exports.updateGoodsDistributorPreviousRequest = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id; // Get user ID
-    const userType = req.user.userType; 
+    const userType = req.user.userType;
     const { status } = req.body;
 
     const request = await GoodsDistributorsPreviousRequestModel.findOne({ shortId: id });

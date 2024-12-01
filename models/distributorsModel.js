@@ -1,32 +1,32 @@
 const mongoose = require("mongoose");
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'; // أرقام وحروف صغيرة
-const nanoid = customAlphabet(alphabet, 12); // ID بطول 8 خانات 
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 12);
 
 const distributorSchema = new mongoose.Schema(
   {
     shortId: {
       type: String,
-      unique: true, // إضافة فهرس للتأكد من أن القيم فريدة
+      unique: true,
       default: () => `d${nanoid()}`,
-      immutable: true // اجعل القيمة غير قابلة للتعديل
+      immutable: true
     },
     full_name: {
       type: String,
       required: true,
-      trim: true // إزالة المسافات من البداية والنهاية
+      trim: true
     },
     email: {
       type: String,
       unique: true,
       required: true,
-      trim: true, // إزالة المسافات
-      lowercase: true // تحويل إلى أحرف صغيرة
+      trim: true,
+      lowercase: true
     },
     phone_number: {
       type: String,
       required: true,
-      trim: true // إزالة المسافات
+      trim: true
     },
     password: {
       type: String,
@@ -34,29 +34,29 @@ const distributorSchema = new mongoose.Schema(
     },
     userType: {
       type: String,
-      default: 'Distributor' // نوع المستخدم
+      default: 'Distributor'
     },
     category: {
       type: String,
-      trim: true, // إزالة المسافات من البداية والنهاية
-      default: '' // القيمة الافتراضية لتكون حقلًا اختياريًا
+      trim: true,
+      default: ''
     },
     addresses: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address' // الربط مع كولكشن العناوين
+        ref: 'Address'
       }
     ],
     manufacturersList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Manufacturers' // الربط مع كولكشن المصانع
+        ref: 'Manufacturers'
       }
     ],
     distributorGoodsList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Manage-Goods-Distributors' // الربط مع كولكشن السلع التي يمتلكها الموزع
+        ref: 'Manage-Goods-Distributors'
       }
     ]
   }

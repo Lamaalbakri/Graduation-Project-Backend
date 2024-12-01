@@ -131,7 +131,7 @@ exports.getTransporterPreviousRequestById = asyncHandler(async (req, res) => {
 // @route PUT /api/v1/transportPreviousRequest/:id
 // @access Private
 exports.updateTransporterPreviousRequest = asyncHandler(async (req, res) => {
-    const { id } = req.params; 
+    const { id } = req.params;
     const userId = req.user._id; // Get the user ID
     const userType = req.user.userType; // Get user type (should be transporter)
     const { status, actual_delivery_date } = req.body; // Get the new status from request body
